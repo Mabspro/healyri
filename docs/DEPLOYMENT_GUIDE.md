@@ -121,13 +121,15 @@ keytool -genkey -v -keystore android/app/keystore/healyri-release.keystore \
 
 ### 3.2 Configure Keystore
 
-1. Create `android/keystore.properties`:
+1. Create `keystore.properties` at the project root (same level as `android/` folder):
 ```properties
 storePassword=your_store_password
 keyPassword=your_key_password
 keyAlias=healyri
-storeFile=../keystore/healyri-release.keystore
+storeFile=keystore/healyri-release.keystore
 ```
+
+**Note:** The `storeFile` path is relative to `android/app/` (where `build.gradle.kts` is located), so `keystore/healyri-release.keystore` correctly resolves to `android/app/keystore/healyri-release.keystore`.
 
 2. Ensure `keystore.properties` is in `.gitignore`
 

@@ -59,8 +59,10 @@
      -alias healyri -keyalg RSA -keysize 2048 -validity 10000
    ```
 
-2. **Create `android/keystore.properties`**
+2. **Create `keystore.properties` at project root**
    - Copy from `android/keystore.properties.example`
+   - Place it at the project root (same level as `android/` folder)
+   - Update `storeFile` path to `keystore/healyri-release.keystore`
    - Fill in your keystore passwords
    - **DO NOT commit this file**
 
