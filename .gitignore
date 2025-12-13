@@ -61,7 +61,7 @@ firebase-debug.log
 **/*.keystore
 **/*.jks
 android/app/keystore/
-android/keystore.properties
+keystore.properties
 
 # Generated files
 *.g.dart
