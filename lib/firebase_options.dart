@@ -78,7 +78,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'healyri-af36a.firebasestorage.app',
     androidClientId: '855143760278-pc3p5o3eq522kcbomdvjt1eg5g6qpv48.apps.googleusercontent.com',
     iosClientId: '855143760278-5jda3jqsabi8otgnbj2bu7op2q8fa49j.apps.googleusercontent.com',
-    iosBundleId: 'com.example.healyri',
+    iosBundleId: 'com.healyri.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
