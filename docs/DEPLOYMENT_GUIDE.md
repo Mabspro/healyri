@@ -12,6 +12,19 @@ This guide provides step-by-step instructions for deploying HeaLyri to various p
 
 ---
 
+## ⚠️ Important: Firebase Hosting vs App Hosting
+
+**HeaLyri uses Firebase Hosting (not App Hosting).**
+
+- ✅ **Firebase Hosting**: Static web hosting (what we use)
+- ❌ **Firebase App Hosting**: Full-stack hosting with Artifact Registry (not needed)
+
+If you see an error about `artifactRegistry` or `firebaseapphosting-images`, you're accidentally using App Hosting. Use `firebase deploy --only hosting` instead.
+
+See [HOSTING_DEPLOYMENT_FIX.md](HOSTING_DEPLOYMENT_FIX.md) for details.
+
+---
+
 ## 1. Environment Setup
 
 ### 1.1 Firebase Projects
