@@ -1,0 +1,12 @@
+{
+  "name": "healyri-seeding-script",
+  "version": "1.0.0",
+  "description": "Data seeding script for Healyri application",
+  "main": "seed_data.js",
+  "scripts": {
+    "seed": "node seed_data.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0"
+  }
+} 

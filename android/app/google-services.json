@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "855143760278",
+    "project_id": "healyri-af36a",
+    "storage_bucket": "healyri-af36a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:855143760278:android:3a350c9a58812102691db7",
+        "android_client_info": {
+          "package_name": "com.example.healyri"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "855143760278-pc3p5o3eq522kcbomdvjt1eg5g6qpv48.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.healyri",
+            "certificate_hash": "65142f2663c8d291b53ca2ac710a9bd103b0a0b9"
+          }
+        },
+        {
+          "client_id": "855143760278-hj7ivko8g5fq32aeo90u2j37lt3b7g1s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNVrrCtEUr_ZT0tY6utCfJBllpW6Yv73o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "855143760278-hj7ivko8g5fq32aeo90u2j37lt3b7g1s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

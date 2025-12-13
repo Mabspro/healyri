@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || hasRole('provider'));
+      allow create: if isAuthenticated();
+        // request.resource.data.keys().hasAll(['name', 'email', 'role', 'createdAt']) &&
+        // request.resource.data.role in ['patient', 'provider', 'driver', 'admin'];
+      allow update: if isOwner(userId) && 
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'email', 'phone', 'address', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+    
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.patientId) || 
+        isOwner(resource.data.providerId) ||
+        hasRole('admin')
+      );
+      allow create: if isAuthenticated() && 
+        request.resource.data.keys().hasAll(['patientId', 'providerId', 'date', 'status']) &&
+        (isOwner(request.resource.data.patientId) || isOwner(request.resource.data.providerId));
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.patientId) || 
+        isOwner(resource.data.providerId) ||
+        hasRole('admin')
+      );
+      allow delete: if isAdmin();
+    }
+    
+    // Healthcare facilities collection
+    match /facilities/{facilityId} {
+      allow read: if true;  // Public read access
+      allow write: if isAdmin();
+    }
+    
+    // Emergencies collection
+    match /emergencies/{emergencyId} {
+      // Patients can read their own emergencies
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.patientId) ||
+        hasRole('provider') ||
+        hasRole('driver') ||
+        isAdmin()
+      );
+      // Patients can create emergencies
+      allow create: if isAuthenticated() &&
+        request.resource.data.keys().hasAll(['patientId', 'timestamp', 'location', 'urgency', 'status']) &&
+        isOwner(request.resource.data.patientId) &&
+        request.resource.data.status == 'created';
+      // Patients can update their own emergencies (e.g., cancel)
+      // Providers/Drivers can update assigned emergencies
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.patientId) ||
+        (hasRole('provider') && request.resource.data.assignedFacilityId != null) ||
+        (hasRole('driver') && request.resource.data.assignedDriverId != null) ||
+        isAdmin()
+      );
+      // Only admins can delete emergencies (for data integrity)
+      allow delete: if isAdmin();
+    }
+    
+    // Events collection (append-only audit log)
+    match /events/{eventId} {
+      // Anyone authenticated can read events (for transparency)
+      allow read: if isAuthenticated();
+      // Only system can create events (via Cloud Functions or services)
+      // For now, allow authenticated users to create events
+      // TODO: Restrict to Cloud Functions only in production
+      allow create: if isAuthenticated();
+      // Events are append-only - no updates or deletes
+      allow update, delete: if false;
+    }
+    
+    // Admin collection
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

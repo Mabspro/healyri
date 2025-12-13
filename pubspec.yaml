@@ -1,0 +1,61 @@
+name: healyri
+description: A comprehensive healthcare platform for Zambia
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none'
+
+# The following defines the version and build number for your application.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider: ^6.0.5
+  http: ^1.1.0
+  shared_preferences: ^2.2.0
+  intl: ^0.18.1
+  url_launcher: ^6.1.12
+  google_fonts: ^6.1.0
+  
+  # Firebase - updated to latest compatible versions
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.0
+  firebase_storage: ^13.0.4
+  firebase_messaging: ^16.0.4
+  firebase_analytics: ^12.0.4
+  firebase_performance: ^0.11.1+2
+  firebase_crashlytics: ^5.0.5
+  
+  # Social sign-in packages
+  google_sign_in: ^6.1.4
+  flutter_facebook_auth: ^6.0.1
+  
+  # Logging and error handling
+  logger: ^2.0.2+1
+  
+  # Location services
+  geolocator: ^13.0.1
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+
+# No dependency overrides needed - using latest Firebase packages
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/logo/
+    - assets/images/icons/
+    - assets/images/illustrations/
