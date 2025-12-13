@@ -1,6 +1,6 @@
 {
-    "name": "healyri",
-    "short_name": "healyri",
+  "name": "HeaLyri - Healthcare Platform for Zambia",
+  "short_name": "HeaLyri",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
