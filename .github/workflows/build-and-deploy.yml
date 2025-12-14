@@ -71,7 +71,7 @@ jobs:
         run: flutter build web --release
       
       - name: Deploy to Firebase Hosting
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -79,7 +79,7 @@ jobs:
           channelId: live
           projectId: healyri-af36a
       - name: Skip Deployment (No Firebase Secret)
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT == '' }}
+        if: ${{ !secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: echo "⚠️ Build succeeded but deployment skipped - FIREBASE_SERVICE_ACCOUNT secret not configured. See docs/CI_CD_STATUS.md for setup instructions."
 
   build-android:
