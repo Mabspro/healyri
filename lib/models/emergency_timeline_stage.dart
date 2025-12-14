@@ -26,7 +26,6 @@ class EmergencyTimelineStage {
   /// Get all stages in order
   static List<EmergencyTimelineStage> getStages(Emergency emergency) {
     final stages = <EmergencyTimelineStage>[];
-    final now = DateTime.now();
 
     // Received
     final receivedAt = emergency.receivedAt ?? emergency.timestamp;
@@ -36,14 +35,13 @@ class EmergencyTimelineStage {
       description: 'Emergency request received',
       icon: Icons.check_circle_outline,
       color: Colors.green,
-      isCompleted: receivedAt != null,
+      isCompleted: true, // Always completed since emergency exists
       isCurrent: emergency.status == EmergencyStatus.created,
       timestamp: receivedAt,
     ));
 
     // Assigned
     final assignedAt = emergency.assignedAt;
-    final isAssigned = emergency.status.index >= EmergencyStatus.dispatched.index;
     stages.add(EmergencyTimelineStage(
       status: EmergencyStatus.dispatched,
       label: 'Assigned',
@@ -57,7 +55,6 @@ class EmergencyTimelineStage {
 
     // En Route
     final enRouteAt = emergency.enRouteAt;
-    final isEnRoute = emergency.status.index >= EmergencyStatus.inTransit.index;
     stages.add(EmergencyTimelineStage(
       status: EmergencyStatus.inTransit,
       label: 'En Route',
