@@ -16,9 +16,11 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - ✅ Navigation aligned with emergency-first
 - ✅ All facility data from Firestore
 - ✅ Welcome screen animations smooth
-- ⚠️ Zambia accents not yet added
+- ✅ Zambia accents added (subtle, on badges and chips)
+- ✅ Seed data system ready
+- ✅ Trust signals enhanced (dispatch center, verified badges, readiness indicators)
 
-**Next Sprint:** Add Zambia accents, update triage_chatbot, populate seed data, enhance trust signals.
+**Next Sprint:** Run seed script to populate Firestore, test with real data, enhance location services.
 
 ---
 
@@ -249,8 +251,8 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 **Next Phase Ready When:**
 - [x] Navigation clearly emergency-first
 - [x] All facilities from Firestore
-- [ ] Seed data populated (script created, needs to be run)
-- [ ] Trust signals enhanced
+- [x] Seed data system ready (script updated, guide created, ready to run)
+- [x] Trust signals enhanced (dispatch center, verified badges, readiness indicators)
 - [x] UX polished and smooth
 
 ---

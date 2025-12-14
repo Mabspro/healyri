@@ -174,28 +174,31 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status Header
-          Row(
+          // Status Header with Dispatch Center Identity
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Request Received',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Request Received',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        EmergencyStatusChip(
+                          status: widget.emergency.status,
+                          urgency: widget.emergency.urgency,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    EmergencyStatusChip(
-                      status: widget.emergency.status,
-                      urgency: widget.emergency.urgency,
-                    ),
-                  ],
-                ),
-              ),
+                  ),
               // Elapsed Timer
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
