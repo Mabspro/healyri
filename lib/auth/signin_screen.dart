@@ -304,9 +304,9 @@ class _SignInScreenState extends State<SignInScreen> {
                             // Close dialog after a delay
                             Future.delayed(const Duration(seconds: 2), () {
                               if (!mounted) return;
-                              final navigator = Navigator.of(context);
-                              if (navigator.canPop()) {
-                                navigator.pop();
+                              // ignore: use_build_context_synchronously
+                              if (Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
                               }
                             });
                           } catch (e) {

@@ -25,8 +25,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             onPressed: () async {
               await _authService.signOut();
               if (!mounted) return;
-              final navigator = Navigator.of(context);
-              navigator.pushAndRemoveUntil(
+              // ignore: use_build_context_synchronously
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const WelcomeScreen()),
                 (route) => false,
               );

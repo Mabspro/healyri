@@ -1068,8 +1068,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 return UserAccountsDrawerHeader(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
                       colors: AppTheme.primaryGradient,
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
