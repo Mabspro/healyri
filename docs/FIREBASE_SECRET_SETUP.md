@@ -22,7 +22,7 @@ The Firebase service account file is required for automated deployment to Fireba
 **Status:**
 - ✅ File exists in project root
 - ✅ Added to `.gitignore`
-- ⚠️ Needs to be added to GitHub Secrets
+- ✅ Added to GitHub Secrets (`FIREBASE_SERVICE_ACCOUNT`)
 
 ---
 

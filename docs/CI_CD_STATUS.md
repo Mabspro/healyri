@@ -17,7 +17,8 @@
 
 ### ✅ Enabled (Ready to Build & Deploy)
 - **Build Web App** - ✅ Builds and deploys to Firebase Hosting automatically
-  - **Status:** Service account configured, direct deployment enabled
+  - **Status:** Service account configured in GitHub Secrets, direct deployment enabled
+  - **Next Run:** Will deploy automatically on next push to `main`
 
 ---
 
