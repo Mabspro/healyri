@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(const HeaLyriApp());
 
     // Wait for any async operations to complete
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
 
     // Verify that the app renders without errors
     expect(find.byType(MaterialApp), findsOneWidget);
