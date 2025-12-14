@@ -12,13 +12,16 @@ import 'package:healyri/main.dart';
 
 void main() {
   testWidgets('HeaLyri app smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const HeaLyriApp());
+    // Use runAsync to handle async operations properly
+    await tester.runAsync(() async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(const HeaLyriApp());
 
-    // Wait for initial frame
-    await tester.pump();
+      // Wait for initial frame
+      await tester.pump();
 
-    // Verify that the app renders without errors
-    expect(find.byType(MaterialApp), findsOneWidget);
-  }, skip: 'Skipping due to pending timer from welcome screen animation');
+      // Verify that the app renders without errors
+      expect(find.byType(MaterialApp), findsOneWidget);
+    });
+  });
 }
