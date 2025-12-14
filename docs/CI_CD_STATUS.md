@@ -15,10 +15,9 @@
 - **Build Android APK** - ✅ Java 17 configured
 - **Build iOS App** - ✅ iOS deployment target 15.0 configured
 
-### ⚠️ Partial (Builds but Won't Deploy)
-- **Build Web App** - Builds successfully, deployment skipped if Firebase secret not configured
-  - **Status:** Service account file found in project root
-  - **Action Required:** Add to GitHub Secrets (see `docs/FIREBASE_SECRET_SETUP.md`)
+### ✅ Enabled (Ready to Build & Deploy)
+- **Build Web App** - ✅ Builds and deploys to Firebase Hosting automatically
+  - **Status:** Service account configured, direct deployment enabled
 
 ---
 
@@ -41,24 +40,19 @@
 
 ---
 
-## To Enable Full Deployment
+## Deployment Status
 
-### Build Web App (Deployment)
-**Current Status:** Builds successfully, deployment skipped if secret missing
+### Build Web App
+**Current Status:** ✅ Fully enabled - builds and deploys automatically
 
-**To Enable Deployment:**
-1. Generate Firebase service account key from Firebase Console
-   - Go to Firebase Console → Project Settings → Service Accounts
-   - Click "Generate New Private Key"
-   - Download the JSON file
-2. Add to GitHub Secrets:
-   - Go to GitHub repo → Settings → Secrets and variables → Actions
-   - Click "New repository secret"
-   - Name: `FIREBASE_SERVICE_ACCOUNT`
-   - Value: Paste the entire contents of the JSON file
-3. Deployment will automatically work on next push to main
+**Configuration:**
+- Service account file: `healyri-af36a-firebase-adminsdk-fbsvc-ea3b7a38c5.json`
+- GitHub Secret: `FIREBASE_SERVICE_ACCOUNT` (must be configured)
+- Deployment: Automatic on every push to `main` branch
 
-**Note:** The build step will always run. If the secret is missing, it will skip deployment but the build will still succeed.
+**If deployment fails:**
+- Verify `FIREBASE_SERVICE_ACCOUNT` secret is configured in GitHub
+- See `docs/FIREBASE_SECRET_SETUP.md` for setup instructions
 
 ---
 
