@@ -280,23 +280,65 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             if (_isLoadingLocation)
               const Center(child: CircularProgressIndicator())
             else if (_confirmedLocation != null) ...[
+              // Human-readable location (placeholder - will be replaced with reverse geocoding)
               Text(
-                'Lat: ${_confirmedLocation!.latitude.toStringAsFixed(6)}\n'
-                'Lng: ${_confirmedLocation!.longitude.toStringAsFixed(6)}',
+                'Location detected',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[900],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Near your current position',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[700],
-                  fontFamily: 'monospace',
+                  color: Colors.grey[600],
                 ),
               ),
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Open map to adjust pin location
-                  _loadLocation(); // For now, just reload
-                },
-                icon: const Icon(Icons.edit_location_alt, size: 18),
-                label: const Text('Adjust Pin'),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // TODO: Open map to adjust pin location
+                        _loadLocation(); // For now, just reload
+                      },
+                      icon: const Icon(Icons.edit_location_alt, size: 18),
+                      label: const Text('Adjust Pin'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      // Show details (lat/lng) in a dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Location Details'),
+                          content: Text(
+                            'Latitude: ${_confirmedLocation!.latitude.toStringAsFixed(6)}\n'
+                            'Longitude: ${_confirmedLocation!.longitude.toStringAsFixed(6)}',
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline, size: 16),
+                    label: const Text('Details'),
+                  ),
+                ],
               ),
             ] else ...[
               Text(

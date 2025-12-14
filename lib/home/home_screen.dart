@@ -29,6 +29,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // 0 = Home, 1 = Find, 2 = Chat, 3 = Profile
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _showFAB = false; // Show FAB only when scrolled down
   
   // Services
   final AppointmentService _appointmentService = AppointmentService();
@@ -36,6 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+  
+  
+  void _onScroll() {
+    // Show FAB when scrolled past emergency banner (approximately 200px)
+    final shouldShow = _scrollController.offset > 200;
+    if (shouldShow != _showFAB) {
+      setState(() {
+        _showFAB = shouldShow;
+      });
+    }
+  }
   
   @override
   void dispose() {
@@ -50,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: _buildCurrentScreen(),
       ),
-      floatingActionButton: _buildEmergencyFAB(),
+      floatingActionButton: _showFAB && _currentIndex == 0 ? _buildEmergencyFAB() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -139,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                    activeEmergency.status != EmergencyStatus.cancelled;
         
         return SingleChildScrollView(
+          controller: _scrollController,
           child: Padding(
             padding: EdgeInsets.all(horizontalPadding),
             child: Column(
@@ -418,57 +438,92 @@ class _HomeScreenState extends State<HomeScreen> {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.shield, color: Colors.blue[700], size: 24),
-                const SizedBox(width: 12),
-                const Text(
-                  'My Coverage',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green[200]!),
-              ),
-              child: Row(
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to coverage details
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Coverage details coming soon')),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green[700], size: 20),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Active Coverage',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                  Row(
+                    children: [
+                      Icon(Icons.shield, color: Colors.blue[700], size: 24),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'My Coverage',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Active Coverage',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Emergency services available 24/7',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      // TODO: View plan
+                    },
+                    icon: const Icon(Icons.info_outline, size: 16),
+                    label: const Text('View Plan'),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      // TODO: Add family member
+                    },
+                    icon: const Icon(Icons.person_add, size: 16),
+                    label: const Text('Add Family'),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Emergency services available 24/7',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

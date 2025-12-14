@@ -91,7 +91,7 @@ class RoleSelectionScreen extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Sign in to access your care tools',
+                                    'Choose your role to continue',
                                     style: AppTheme.heading3.copyWith(
                                       color: AppTheme.textColor,
                                       fontSize: isMobile ? 15 : 22,
@@ -105,7 +105,7 @@ class RoleSelectionScreen extends StatelessWidget {
                                     'Patient',
                                     Icons.person,
                                     AppTheme.primaryGradient,
-                                    isMobile ? 'Appointments & health data' : 'Manage appointments and health data',
+                                    isMobile ? 'Request urgent help + track response' : 'Request urgent help and track response',
                                     () => _navigateToPatientHome(context),
                                     isMobile: isMobile,
                                   ),
@@ -115,7 +115,7 @@ class RoleSelectionScreen extends StatelessWidget {
                                     'Healthcare Provider',
                                     Icons.local_hospital,
                                     AppTheme.secondaryGradient,
-                                    isMobile ? 'Schedules & consults' : 'Manage schedules and consults',
+                                    isMobile ? 'Receive incoming emergency alerts' : 'Receive and respond to incoming emergency alerts',
                                     () => _navigateToClinicHome(context),
                                     isMobile: isMobile,
                                   ),
@@ -125,7 +125,7 @@ class RoleSelectionScreen extends StatelessWidget {
                                     'Driver',
                                     Icons.drive_eta,
                                     AppTheme.accentGradient,
-                                    isMobile ? 'Patient transport' : 'Handle patient transport services',
+                                    isMobile ? 'Respond to dispatch requests' : 'Respond to emergency dispatch requests',
                                     () => _navigateToDriverHome(context),
                                     isMobile: isMobile,
                                   ),

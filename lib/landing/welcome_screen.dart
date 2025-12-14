@@ -76,27 +76,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   int _currentCardIndex = 0;
   final PageController _cardPageController = PageController();
   
-  // Info card data
+  // Info card data - Emergency coordination focus
   final List<Map<String, dynamic>> _infoCards = [
     {
-      'title': 'Connect with Healthcare',
-      'description': 'Find and connect with healthcare providers in your area, with ratings and reviews.',
-      'icon': Icons.local_hospital,
+      'title': 'Emergency Help in Minutes',
+      'description': 'Hotline + app + SMS — get help when you need it most, even with low data.',
+      'icon': Icons.emergency,
     },
     {
-      'title': 'Book Appointments',
-      'description': 'Schedule appointments with your preferred providers at times that work for you.',
-      'icon': Icons.calendar_today,
+      'title': 'Verified Responders & Facilities',
+      'description': 'Trusted network of drivers and healthcare facilities ready to respond.',
+      'icon': Icons.verified_user,
     },
     {
-      'title': 'Telehealth Consultations',
-      'description': 'Connect with healthcare providers remotely through video calls from home.',
-      'icon': Icons.video_call,
-    },
-    {
-      'title': 'Emergency Transport',
-      'description': 'Quick access to emergency services and transportation when you need it most.',
-      'icon': Icons.local_taxi,
+      'title': 'Live Updates & Case Timeline',
+      'description': 'Track your emergency from dispatch to resolution with real-time updates.',
+      'icon': Icons.timeline,
     },
   ];
   
@@ -236,7 +231,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                       child: Column(
                                         children: [
                                           Text(
-                                            'Your health journey. Empowered.',
+                                            'Emergency help, coordinated.',
                                             style: AppTheme.heading2.copyWith(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
@@ -246,7 +241,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           ),
                                           SizedBox(height: isMobile ? 12 : 16),
                                           Text(
-                                            'Book, manage, and stay on top of your care – anytime, anywhere.',
+                                            'Dispatch + responders + facilities — connected.',
                                             style: AppTheme.subtitle.copyWith(
                                               color: Colors.white.withOpacity(0.9),
                                               fontSize: isMobile ? 16 : 18,

@@ -468,6 +468,15 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               textAlign: TextAlign.center,
                             ),
+                            SizedBox(height: isMobile ? 8 : 12),
+                            Text(
+                              'Emergency services are available 24/7 once signed in.',
+                              style: AppTheme.caption.copyWith(
+                                color: Colors.grey[600],
+                                fontSize: isMobile ? 11 : 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                             
                             SizedBox(height: isMobile ? 20 : 24),
                             
