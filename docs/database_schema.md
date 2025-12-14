@@ -73,30 +73,34 @@ Stores information about healthcare facilities such as hospitals, clinics, and p
 
 **Collection**: `facilities`
 
-**Document ID**: Auto-generated
+**Document ID**: Auto-generated or custom (e.g., `facility-lusaka-general`)
 
 **Fields**:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| name | string | Facility name |
-| type | string | Facility type: "hospital", "clinic", "pharmacy" |
-| address | map | Physical address (street, city, province, postalCode) |
-| location | geopoint | Geographic coordinates for mapping |
-| contactPhone | string | Primary contact phone number |
-| contactEmail | string | Contact email address |
-| website | string | Facility website (optional) |
-| operatingHours | map | Operating hours by day of week |
-| services | array | List of services offered |
-| specialties | array | Medical specialties available |
-| paymentOptions | array | Accepted payment methods |
-| insuranceAccepted | array | Accepted insurance providers |
-| photos | array | URLs to facility photos |
-| adminUsers | array | User IDs of facility administrators |
+| name | string | Facility name (required) |
+| type | string | Facility type: "hospital", "clinic", "pharmacy", "healthCenter" |
+| address | string | Physical address (optional) |
+| location | geopoint | Geographic coordinates for mapping and distance calculation (optional but recommended) |
+| contactPhone | string | Primary contact phone number (optional) |
+| contactEmail | string | Contact email address (optional) |
+| services | array | List of services offered (e.g., ["Emergency", "Surgery", "Pediatrics"]) |
+| rating | number | Average rating from reviews (optional) |
+| isVerified | boolean | Whether the facility is verified (default: false) |
+| acceptsNHIMA | boolean | Whether facility accepts National Health Insurance (default: false) |
+| operatingHours | map | Operating hours by day (e.g., {"monday": "24/7", "tuesday": "08:00-17:00"}) |
 | createdAt | timestamp | When the facility was added to the system |
 | updatedAt | timestamp | When the facility was last updated |
-| isVerified | boolean | Whether the facility is verified |
-| averageRating | number | Average rating from reviews |
+
+**Indexes Required:**
+- `isVerified` (for filtering verified facilities)
+- `type` + `isVerified` (for filtering by type)
+- `location` (for geospatial queries - requires Firestore geohash)
+
+**Model:** `lib/models/facility.dart`  
+**Service:** `lib/services/facility_service.dart`  
+**Seed Script:** `scripts/seed_facilities.js`
 | totalReviews | number | Total number of reviews |
 
 **Sub-collections**:

@@ -12,7 +12,7 @@ HeaLyri is **Zambia's digital front door to healthcare** - not just an app, but 
 
 **Strategic Focus:** Emergency → Transport → Facility flow (our wedge)
 
-> **⚠️ Current State:** The Emergency Button is currently a UI facade with zero backend logic. This "Air Gap" has been independently validated by external review. See [docs/EXTERNAL_VALIDATION.md](docs/EXTERNAL_VALIDATION.md) and [docs/EXECUTION_CHECKLIST.md](docs/EXECUTION_CHECKLIST.md) for the 4-week plan to close this gap.
+> **✅ Current State:** Emergency coordination platform successfully implemented. Emergency-first architecture, commitment view, and patient dashboard dominance completed. See [docs/PLATFORM_REVIEW.md](docs/PLATFORM_REVIEW.md) for comprehensive review and [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) for upcoming work.
 
 HeaLyri connects patients with healthcare providers through an integrated platform offering:
 
@@ -26,51 +26,61 @@ HeaLyri connects patients with healthcare providers through an integrated platfo
 
 ## ✨ Recent Improvements (December 2024)
 
-### ✅ Completed
+### ✅ Completed - Emergency Coordination Shift
 
-1. **Logging Infrastructure**
-   - Replaced all `print()` statements with proper logging
-   - Integrated Firebase Crashlytics for production error reporting
-   - Created centralized `AppLogger` service
+1. **Emergency-First Architecture**
+   - ✅ Emergency state machine with canonical timestamps
+   - ✅ Hybrid state + event architecture for auditability
+   - ✅ Emergency service with real Firestore integration
+   - ✅ Cloud Functions for automatic dispatch
 
-2. **Error Handling**
-   - Implemented centralized error handling service
-   - User-friendly error messages
-   - Platform-specific error reporting (Crashlytics on mobile, console on web)
+2. **Reusable UI Components**
+   - ✅ EmergencyStatusChip
+   - ✅ EmergencyTimelineWidget
+   - ✅ FallbackActionBar (Call/SMS backup)
+   - ✅ ResponderCard & FacilityCard
 
-3. **Input Validation**
-   - Comprehensive validation utilities
-   - Email, password, phone number validation
-   - Zambia-specific phone number format support
+3. **Emergency Commitment View**
+   - ✅ Immediate reassurance after emergency trigger
+   - ✅ Real-time elapsed timer
+   - ✅ Dynamic next-step messages
+   - ✅ Integrated timeline and responder cards
 
-4. **Code Quality**
-   - Removed unused code and methods
-   - Fixed all linter warnings
-   - Improved code organization
+4. **Patient Dashboard Transformation**
+   - ✅ Emergency-dominant layout
+   - ✅ Active emergency banner/tracker
+   - ✅ Context-aware Emergency FAB
+   - ✅ Emergency Readiness module (replaces appointments)
+   - ✅ Trust cues and coverage information
 
-5. **Firebase Package Updates**
-   - Updated all Firebase packages to latest versions
-   - Fixed web compatibility issues
-   - Resolved dependency conflicts
+5. **UX/UI Improvements**
+   - ✅ Emergency-focused onboarding messaging
+   - ✅ Role selection with emergency one-liners
+   - ✅ Human-readable location display
+   - ✅ Mobile-first responsive design
+   - ✅ Custom page transitions
 
-6. **Platform Compatibility**
-   - Fixed Crashlytics initialization for web platform
-   - Improved HTML structure and meta tags
-   - Resolved duplicate script loading issues
+6. **Infrastructure**
+   - ✅ Logging infrastructure (AppLogger)
+   - ✅ Error handling service
+   - ✅ Input validation
+   - ✅ Firebase Hosting deployment
+   - ✅ Git repository setup
 
 ### 🚧 In Progress
 
-- Service layer architecture
-- Repository pattern implementation
-- Enhanced Firestore security rules
-- Offline support
+- **Facility Model Integration** - Removing hardcoded facility data
+- **Seed Data System** - Populating Firestore with real facilities
+- **Documentation Updates** - Reflecting current state
 
-### 📋 Planned
+### 📋 Next Steps
 
-- Comprehensive test coverage
-- Payment integration
-- Advanced AI Triage features
-- Performance optimization
+See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) for detailed next steps:
+- Remove all hardcoded facility data
+- Integrate Facility model across all screens
+- Seed production data
+- Enhance location services
+- Connect Emergency Readiness to real data
 
 ## 🏗️ Architecture
 

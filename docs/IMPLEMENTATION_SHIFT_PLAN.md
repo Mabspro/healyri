@@ -352,6 +352,61 @@ HeaLyri is shifting from a multi-feature healthcare app to an **Emergency Coordi
 
 ---
 
+## Implementation Status
+
+### ✅ Completed Phases
+
+**Day 0.5: State Machine Contract** ✅
+- Canonical timestamps wired in Emergency model
+- Safe null handling for partial data
+- Backward compatibility maintained
+
+**Day 1: Component Kit** ✅
+- EmergencyStatusChip
+- EmergencyTimelineWidget
+- FallbackActionBar
+- ResponderCard
+- FacilityCard
+
+**Day 2: EmergencyCommitmentView** ✅
+- Immediate reassurance widget
+- Elapsed timer
+- Dynamic next-step messages
+- Integrated timeline and cards
+
+**Day 3: EmergencyScreen Upgrade** ✅
+- Quick chips for emergency type
+- Location confirmation
+- "Can you talk?" and "People affected" inputs
+- Commitment view integration
+
+**Day 4-5: Patient Dashboard Dominance** ✅
+- Emergency-dominant layout
+- Active emergency banner
+- Context-aware FAB
+- Emergency Readiness module
+- Non-wedge features moved to Explore tab
+
+**UX Improvements** ✅
+- Emergency-focused onboarding
+- Role selection messaging
+- Sign-in reassurance
+- Human-readable locations
+- Trust cues and actionable coverage
+
+### 🚧 Current Phase
+
+**Platform Review & Hardcoded Data Removal**
+- Facility model created
+- FacilityService enhanced
+- Seed data system created
+- Documentation updated
+- **Next:** Remove hardcoded facilities from UI
+
+### 📋 Remaining Work
+
+See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) for detailed next steps.
+
 ## Notes
 
 - Keep existing backend services (they're good)
@@ -359,4 +414,5 @@ HeaLyri is shifting from a multi-feature healthcare app to an **Emergency Coordi
 - Maintain data models (they support the shift)
 - Test with real emergency flows
 - Ensure offline-first behavior where possible
+- **Remove all hardcoded data** - use seed data instead
 
