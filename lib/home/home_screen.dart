@@ -45,6 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.addListener(_onScroll);
   }
   
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
   
   void _onScroll() {
     // Show FAB when scrolled past emergency banner (approximately 200px)
