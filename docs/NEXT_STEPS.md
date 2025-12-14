@@ -1,8 +1,8 @@
-# HeaLyri Next Steps
+# HeaLyri Next Steps - Refined Plan
 
 **Date:** December 2024  
 **Status:** Post-Emergency Shift Implementation  
-**Based On:** [PLATFORM_REVIEW.md](PLATFORM_REVIEW.md)
+**Based On:** Platform Review + UX Feedback
 
 ---
 
@@ -13,35 +13,159 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - ✅ Reusable UI components
 - ✅ Emergency commitment view
 - ✅ Patient dashboard dominance
+- ⚠️ Navigation still shows competing identities
 - ⚠️ Hardcoded facility data (needs removal)
-- ⚠️ Missing Facility model integration
+- ⚠️ Welcome screen animation jank
 
-**Next Phase:** Remove hardcoded data, integrate Facility model, seed production data.
+**Next Sprint:** Remove cognitive dissonance, unify Facility model, fix animations, add Zambia accents.
+
+---
+
+## Recommended Sprint (This Week) - HIGH IMPACT
+
+### 1. Remove Appointments Surface (CRITICAL)
+
+**Priority: CRITICAL** - Removes cognitive dissonance
+
+**Tasks:**
+- [ ] Remove "Appointments" from drawer menu
+- [ ] Move appointments to "Explore → Coming Soon" (if needed)
+- [ ] Update drawer to focus on emergency-relevant items
+- [ ] Verify no appointment references in primary navigation
+
+**Acceptance Criteria:**
+- Drawer shows no appointment booking options
+- Navigation clearly communicates emergency-first
+- No competing product identities
+
+### 2. Rename Bottom Navigation Tabs
+
+**Priority: CRITICAL** - Aligns navigation with wedge
+
+**Current:** Home / Find / Explore / Profile  
+**New:** Home / Facilities / Coverage / Profile
+
+**Tasks:**
+- [ ] Rename "Find" → "Facilities"
+- [ ] Rename "Explore" → "Coverage" (or "Readiness")
+- [ ] Update tab icons if needed
+- [ ] Update navigation logic
+
+**Acceptance Criteria:**
+- Navigation clearly reflects emergency coordination
+- No "Find" or generic "Explore" labels
+- Tabs map to emergency wedge features
+
+### 3. Unify Facility Model (CRITICAL)
+
+**Priority: CRITICAL** - Removes hardcoded data
+
+**Tasks:**
+- [ ] Delete `HealthcareFacility` class from `facility_directory_screen.dart`
+- [ ] Convert `FacilityDirectoryScreen` to use `Facility` model + `FacilityService`
+- [ ] Replace hardcoded facilities in `home_screen.dart` with `FacilityService.getNearbyFacilities()`
+- [ ] Update `triage_chatbot.dart` to use FacilityService
+- [ ] Test with real Firestore data
+
+**Acceptance Criteria:**
+- Zero hardcoded facility names in UI
+- All facilities come from Firestore
+- Single Facility model used everywhere
+- Distance calculation works correctly
+
+### 4. Make Emergency Readiness Real
+
+**Priority: HIGH** - Builds trust
+
+**Tasks:**
+- [ ] Connect "Location enabled" to actual permission status
+- [ ] Connect "Emergency contacts set" to user's contact list (or Firestore)
+- [ ] Add battery level check for optimization tip
+- [ ] Gate readiness checks off actual system state (not hardcoded green)
+
+**Acceptance Criteria:**
+- Readiness checks reflect actual system state
+- Users can see what needs setup
+- Battery tip shows when battery is low
+- Trust-building through transparency
+
+### 5. Fix Welcome Screen Animation Jank
+
+**Priority: HIGH** - Improves first impression
+
+**Tasks:**
+- [ ] Remove `IntrinsicHeight` (causes re-layout jank)
+- [ ] Use separate `AnimationController` for pulse (not reuse entrance controller)
+- [ ] Replace `Spacer()` with `Expanded(child: SizedBox())` in scroll contexts
+- [ ] Use fixed heights for hero block and carousel
+- [ ] Test on multiple screen sizes
+
+**Acceptance Criteria:**
+- No layout jumps or re-measurement
+- Smooth animations throughout
+- No animation controller conflicts
+- Works on all screen sizes
+
+### 6. Add Zambia Accents (Subtle)
+
+**Priority: MEDIUM** - Local identity without overdoing
+
+**Tasks:**
+- [ ] Add Zambia accent colors to theme (subtle, not dominant)
+- [ ] Apply accents to:
+  - Verified badges
+  - NHIMA acceptance chips
+  - Emergency status chips
+  - Small accent strokes/dividers
+- [ ] Keep base palette clean and modern
+- [ ] Test that it "whispers Zambia" not "shouts"
+
+**Acceptance Criteria:**
+- Zambia identity visible but subtle
+- Modern medical UI maintained
+- Accents enhance, don't distract
+- Works across all screens
 
 ---
 
 ## Immediate Actions (This Week)
 
-### 1. Facility Model Integration
+### Priority 1: Navigation & Identity
+1. Remove appointments from drawer ✅ (in progress)
+2. Rename bottom nav tabs ✅ (in progress)
+3. Update drawer menu items
 
-**Priority: CRITICAL**
+### Priority 2: Facility Model Unification
+1. Delete HealthcareFacility class
+2. Convert FacilityDirectoryScreen
+3. Replace hardcoded facilities in HomeScreen
+4. Test with seed data
+
+### Priority 3: UX Polish
+1. Fix Welcome screen animations
+2. Make Emergency Readiness real
+3. Add Zambia accents
+
+---
+
+## Short-Term Goals (Next 2 Weeks)
+
+### 7. Enhanced Location Services
+
+**Priority: MEDIUM**
 
 **Tasks:**
-- [x] Create `Facility` model (`lib/models/facility.dart`)
-- [x] Update `FacilityService` with nearby facilities query
-- [ ] Replace hardcoded facilities in `lib/home/home_screen.dart`
-- [ ] Replace hardcoded facilities in `lib/facility_directory/facility_directory_screen.dart`
-- [ ] Update `lib/ai_triage/triage_chatbot.dart` facility references
-- [ ] Remove `lib/emergency/emergency_button.dart` if unused
-- [ ] Test facility queries with real Firestore data
+- [ ] Implement reverse geocoding for human-readable addresses
+- [ ] Replace "Location detected" with actual address/landmark
+- [ ] Add "Adjust Pin" map functionality
+- [ ] Cache location data for offline use
 
 **Acceptance Criteria:**
-- No hardcoded facility names in UI code
-- All facilities come from Firestore
-- Distance calculation works correctly
-- Nearby facilities sorted by distance
+- Emergency screen shows readable location
+- Users can adjust location on map
+- Location persists across app restarts
 
-### 2. Seed Data System
+### 8. Seed Data System
 
 **Priority: HIGH**
 
@@ -57,77 +181,26 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - All facilities have valid coordinates
 - Facilities are verified and ready for use
 
-### 3. Documentation Updates
+### 9. Trust Signals Enhancement
 
 **Priority: MEDIUM**
 
 **Tasks:**
-- [x] Create `docs/PLATFORM_REVIEW.md`
-- [x] Create `docs/NEXT_STEPS.md` (this document)
-- [ ] Update `README.md` with current state
-- [ ] Update `docs/IMPLEMENTATION_SHIFT_PLAN.md` with completed phases
-- [ ] Update `docs/EXECUTION_PLAN.md` progress
-- [ ] Add Facility collection to `docs/database_schema.md`
+- [ ] Add verified responder badge
+- [ ] Add facility readiness indicator
+- [ ] Add "dispatch center" identity
+- [ ] Ensure offline fallback always visible (Call/SMS)
 
 **Acceptance Criteria:**
-- All docs reflect current code state
-- No outdated information
-- Clear next steps documented
-
----
-
-## Short-Term Goals (Next 2 Weeks)
-
-### 4. Enhanced Location Services
-
-**Priority: MEDIUM**
-
-**Tasks:**
-- [ ] Implement reverse geocoding for human-readable addresses
-- [ ] Replace "Location detected" with actual address/landmark
-- [ ] Add "Adjust Pin" map functionality
-- [ ] Cache location data for offline use
-
-**Acceptance Criteria:**
-- Emergency screen shows readable location (e.g., "Near Independence Ave, Lusaka")
-- Users can adjust location on map
-- Location persists across app restarts
-
-### 5. Emergency Readiness Integration
-
-**Priority: MEDIUM**
-
-**Tasks:**
-- [ ] Connect "Location enabled" to actual permission status
-- [ ] Connect "Emergency contacts set" to user's contact list
-- [ ] Add battery level check for optimization tip
-- [ ] Create emergency setup/review screen
-
-**Acceptance Criteria:**
-- Readiness checks reflect actual system state
-- Users can set up emergency contacts
-- Battery optimization tip shows when battery is low
-
-### 6. Facility Enhancements
-
-**Priority: LOW**
-
-**Tasks:**
-- [ ] Add facility availability status (open/closed)
-- [ ] Add facility capacity indicators
-- [ ] Add facility emergency acceptance status
-- [ ] Implement facility search with filters
-
-**Acceptance Criteria:**
-- Facilities show real-time availability
-- Users can filter by type, services, NHIMA acceptance
-- Search works across facility names and addresses
+- Trust signals visible throughout emergency flow
+- Users feel system is reliable
+- Offline options always accessible
 
 ---
 
 ## Medium-Term Goals (Next Month)
 
-### 7. Production Data Management
+### 10. Production Data Management
 
 **Priority: MEDIUM**
 
@@ -137,13 +210,7 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - [ ] Implement facility onboarding process
 - [ ] Add facility ratings/reviews system
 
-**Acceptance Criteria:**
-- Admins can add/edit facilities via UI
-- Facilities can be verified/unverified
-- New facilities can be onboarded
-- Users can rate facilities
-
-### 8. Testing Infrastructure
+### 11. Testing Infrastructure
 
 **Priority: HIGH**
 
@@ -154,12 +221,7 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - [ ] Write tests for location calculations
 - [ ] Set up integration test environment
 
-**Acceptance Criteria:**
-- Test coverage > 60% for services
-- All critical paths tested
-- CI/CD runs tests automatically
-
-### 9. Performance Optimization
+### 12. Performance Optimization
 
 **Priority: LOW**
 
@@ -169,94 +231,40 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - [ ] Add pagination for facility lists
 - [ ] Optimize image loading
 
-**Acceptance Criteria:**
-- Facility queries < 500ms
-- App loads < 2s on 3G
-- Smooth scrolling with 100+ facilities
-
----
-
-## Long-Term Goals (Next Quarter)
-
-### 10. Advanced Emergency Features
-
-**Priority: MEDIUM**
-
-**Tasks:**
-- [ ] Real-time driver location tracking
-- [ ] ETA calculations with traffic
-- [ ] Multi-facility coordination
-- [ ] Emergency escalation workflows
-
-### 11. Analytics & Reporting
-
-**Priority: MEDIUM**
-
-**Tasks:**
-- [ ] Emergency response time analytics
-- [ ] Facility performance metrics
-- [ ] Driver performance tracking
-- [ ] Ministry reporting dashboard
-
-### 12. Scale Preparation
-
-**Priority: LOW**
-
-**Tasks:**
-- [ ] Multi-city support
-- [ ] Regional facility management
-- [ ] Load testing
-- [ ] Disaster recovery planning
-
----
-
-## Blocked Items
-
-**None currently**
-
----
-
-## Dependencies
-
-**Facility Model Integration:**
-- Blocks: Facility directory updates, nearby facilities display
-- Depends on: Facility model creation (✅ done)
-
-**Seed Data:**
-- Blocks: Testing with real data, production deployment
-- Depends on: Facility model (✅ done), service account setup
-
 ---
 
 ## Success Metrics
 
-**This Phase Complete When:**
-- [ ] Zero hardcoded facility data in codebase
-- [ ] All facilities loaded from Firestore
-- [ ] Seed data script functional
-- [ ] Documentation updated
-- [ ] At least 5 facilities in production database
+**This Sprint Complete When:**
+- [ ] No appointments in primary navigation
+- [ ] Bottom nav reflects emergency wedge
+- [ ] Zero hardcoded facility data
+- [ ] Single Facility model used everywhere
+- [ ] Welcome screen animations smooth
+- [ ] Emergency Readiness shows real state
+- [ ] Zambia accents added subtly
 
 **Next Phase Ready When:**
-- [ ] Facility model fully integrated
-- [ ] Real facility data in use
-- [ ] Location services enhanced
-- [ ] Emergency readiness connected to real data
+- [ ] Navigation clearly emergency-first
+- [ ] All facilities from Firestore
+- [ ] Seed data populated
+- [ ] Trust signals enhanced
+- [ ] UX polished and smooth
 
 ---
 
 ## Risk Mitigation
 
-**Risk: Facility Model Integration Delays**
-- **Mitigation:** Prioritize this week, test incrementally
+**Risk: Navigation Changes Break User Flow**
+- **Mitigation:** Test thoroughly, update all navigation references
 
-**Risk: Seed Data Issues**
-- **Mitigation:** Test seed script in dev environment first
+**Risk: Facility Model Integration Issues**
+- **Mitigation:** Update one screen at a time, test after each
 
-**Risk: Breaking Changes**
-- **Mitigation:** Update one screen at a time, test after each change
+**Risk: Animation Fixes Cause New Issues**
+- **Mitigation:** Test on multiple devices, keep backup of working version
 
 ---
 
 **Last Updated:** December 2024  
-**Next Review:** After facility model integration
+**Next Review:** After sprint completion

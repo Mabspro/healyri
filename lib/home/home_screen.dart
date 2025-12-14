@@ -81,12 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_rounded),
-            label: 'Find',
+            icon: Icon(Icons.local_hospital_rounded),
+            label: 'Facilities',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore_rounded),
-            label: 'Explore',
+            icon: Icon(Icons.shield_rounded),
+            label: 'Coverage',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
@@ -120,9 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return _buildFindTab();
+        return _buildFacilitiesTab();
       case 2:
-        return _buildExploreTab();
+        return _buildCoverageTab();
       case 3:
         return _buildProfileTab();
       default:
@@ -769,8 +769,15 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Find Care',
+              'Facilities',
               style: AppTheme.heading2,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Find verified healthcare facilities near you',
+              style: AppTheme.bodyText.copyWith(
+                color: AppTheme.textSecondaryColor,
+              ),
             ),
             const SizedBox(height: 16),
             AppComponents.searchField(
@@ -805,33 +812,34 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
             
-            // Nearby facilities
+            // Navigate to full facility directory
+            ElevatedButton.icon(
+              onPressed: () {
+                context.pushSlide(const FacilityDirectoryScreen());
+              },
+              icon: const Icon(Icons.local_hospital_rounded),
+              label: const Text('View All Facilities'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // Quick access to nearby facilities
             AppComponents.sectionHeader(
               title: 'Nearby Facilities',
               actionText: 'View Map',
               onActionPressed: () {
-                // Navigate to map view
+                context.pushSlide(const FacilityDirectoryScreen());
               },
             ),
-            _buildNearbyFacilityCard(
-              'Lusaka Medical Center',
-              '2.5 km away',
-              '4.8',
-              'General Hospital',
-            ),
-            const SizedBox(height: 16),
-            _buildNearbyFacilityCard(
-              'University Teaching Hospital',
-              '3.7 km away',
-              '4.6',
-              'Specialized Care',
-            ),
-            const SizedBox(height: 16),
-            _buildNearbyFacilityCard(
-              'Kanyama Clinic',
-              '1.2 km away',
-              '4.2',
-              'Primary Care',
+            // TODO: Replace with real FacilityService.getNearbyFacilities()
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Text('Loading facilities...'),
+              ),
             ),
           ],
         ),
@@ -948,19 +956,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   
-  Widget _buildExploreTab() {
+  Widget _buildCoverageTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Explore',
+            'Coverage & Readiness',
             style: AppTheme.heading2,
           ),
           const SizedBox(height: 8),
           Text(
-            'Additional healthcare services',
+            'Your emergency protection and setup status',
             style: AppTheme.bodyText.copyWith(
               color: AppTheme.textSecondaryColor,
             ),
@@ -1195,14 +1203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.calendar_today),
-                    title: const Text('Appointments'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.pushSlide(const BookingScreen());
-                    },
-                  ),
+                  // Appointments moved to Explore tab (Coming Soon)
                   ListTile(
                     leading: const Icon(Icons.local_hospital),
                     title: const Text('Find Facilities'),
