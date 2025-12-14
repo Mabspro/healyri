@@ -6,7 +6,6 @@ import '../services/location_service.dart';
 import '../core/logger.dart';
 import '../core/error_handler.dart';
 import 'emergency_commitment_view.dart';
-import '../shared/emergency_components.dart';
 
 /// Emergency screen that creates a real emergency in the backend
 /// Upgraded with quick chips, location confirmation, and commitment view
