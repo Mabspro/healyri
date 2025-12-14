@@ -51,6 +51,8 @@ app.*.map.json
 # Firebase
 .firebase/
 firebase-debug.log
+*-firebase-adminsdk-*.json
+firebase-service-account.json
 
 # Environment variables
 .env
