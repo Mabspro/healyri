@@ -15,10 +15,13 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const HeaLyriApp());
 
-    // Wait for any async operations to complete
-    await tester.pumpAndSettle();
+    // Wait for initial frame
+    await tester.pump();
 
     // Verify that the app renders without errors
     expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // Allow any pending timers to complete (but don't wait indefinitely)
+    await tester.pump(const Duration(milliseconds: 100));
   });
 }
