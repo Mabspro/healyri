@@ -15,6 +15,9 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const HeaLyriApp());
 
+    // Wait for any async operations to complete
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
     // Verify that the app renders without errors
     expect(find.byType(MaterialApp), findsOneWidget);
   });
