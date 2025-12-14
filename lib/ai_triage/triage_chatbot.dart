@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/facility_service.dart';
 import '../services/location_service.dart';
-import '../models/facility.dart';
 
 class TriageChatbot extends StatefulWidget {
   const TriageChatbot({Key? key}) : super(key: key);
