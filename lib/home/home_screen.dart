@@ -970,14 +970,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return const ProfileScreen();
   }
 
-  /// Format number with comma separators (e.g., 8243 -> "8,243")
-  String _formatNumber(int number) {
-    return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
-  }
-
   /// Build the drawer menu
   Widget _buildDrawer() {
     final user = _auth.currentUser;
