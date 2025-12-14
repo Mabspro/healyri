@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/facility.dart';
+import '../services/facility_service.dart';
+import '../services/location_service.dart';
+import '../shared/theme.dart';
+import '../shared/route_transitions.dart';
 
 class FacilityDirectoryScreen extends StatefulWidget {
   const FacilityDirectoryScreen({Key? key}) : super(key: key);
@@ -9,61 +15,25 @@ class FacilityDirectoryScreen extends StatefulWidget {
 
 class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FacilityService _facilityService = FacilityService();
+  final LocationService _locationService = LocationService();
   String _selectedFilter = 'All';
   final List<String> _filterOptions = ['All', 'Hospitals', 'Clinics', 'Pharmacies'];
+  String _searchQuery = '';
+  GeoPoint? _userLocation;
 
-  final List<HealthcareFacility> _facilities = [
-    HealthcareFacility(
-      id: '1',
-      name: 'Lusaka General Hospital',
-      type: 'Hospital',
-      address: '123 Independence Ave, Lusaka',
-      distance: 2.5,
-      rating: 4.2,
-      services: ['Emergency', 'Surgery', 'Pediatrics', 'Maternity'],
-      imageUrl: 'assets/images/hospital1.jpg',
-      acceptsNHIMA: true, // Participates in National Health Insurance
-    ),
-    HealthcareFacility(
-      id: '2',
-      name: 'Kanyama Clinic',
-      type: 'Clinic',
-      address: '45 Kanyama Road, Lusaka',
-      distance: 1.2,
-      rating: 3.8,
-      services: ['General Medicine', 'Vaccinations', 'HIV Testing'],
-      imageUrl: 'assets/images/clinic1.jpg',
-      acceptsNHIMA: true, // Participates in National Health Insurance
-    ),
-    HealthcareFacility(
-      id: '3',
-      name: 'MedPlus Pharmacy',
-      type: 'Pharmacy',
-      address: '78 Cairo Road, Lusaka',
-      distance: 0.8,
-      rating: 4.5,
-      services: ['Prescription Filling', 'Health Consultations', 'Medical Supplies'],
-      imageUrl: 'assets/images/pharmacy1.jpg',
-      acceptsNHIMA: false, // Does not participate in National Health Insurance
-    ),
-    HealthcareFacility(
-      id: '4',
-      name: 'University Teaching Hospital',
-      type: 'Hospital',
-      address: '10 Nationalist Road, Lusaka',
-      distance: 3.7,
-      rating: 4.0,
-      services: ['Emergency', 'Surgery', 'Oncology', 'Cardiology', 'Neurology'],
-      imageUrl: 'assets/images/hospital2.jpg',
-      acceptsNHIMA: true, // Participates in National Health Insurance
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserLocation();
+  }
 
-  List<HealthcareFacility> get _filteredFacilities {
-    if (_selectedFilter == 'All') {
-      return _facilities;
-    } else {
-      return _facilities.where((facility) => facility.type == _selectedFilter.substring(0, _selectedFilter.length - 1)).toList();
+  Future<void> _loadUserLocation() async {
+    final location = await _locationService.getCurrentLocation();
+    if (mounted) {
+      setState(() {
+        _userLocation = location;
+      });
     }
   }
 
@@ -73,11 +43,25 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
     super.dispose();
   }
 
+  FacilityType? _getFacilityTypeFromFilter(String filter) {
+    switch (filter) {
+      case 'Hospitals':
+        return FacilityType.hospital;
+      case 'Clinics':
+        return FacilityType.clinic;
+      case 'Pharmacies':
+        return FacilityType.pharmacy;
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Healthcare Facilities'),
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: Column(
         children: [
@@ -95,7 +79,9 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                     ),
                   ),
                   onChanged: (value) {
-                    setState(() {});
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
                   },
                 ),
                 const SizedBox(height: 16),
@@ -124,25 +110,105 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
             ),
           ),
           Expanded(
-            child: _filteredFacilities.isEmpty
-                ? const Center(
-                    child: Text('No facilities found'),
-                  )
-                : ListView.builder(
-                    itemCount: _filteredFacilities.length,
-                    itemBuilder: (context, index) {
-                      return _buildFacilityCard(_filteredFacilities[index]);
-                    },
-                  ),
+            child: StreamBuilder<List<Facility>>(
+              stream: _facilityService.getAllFacilities(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text('Error loading facilities: ${snapshot.error}'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => setState(() {}),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.local_hospital, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No facilities found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Facilities will appear here once they are added to the system.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Filter facilities
+                List<Facility> facilities = snapshot.data!;
+                
+                // Apply type filter
+                final selectedType = _getFacilityTypeFromFilter(_selectedFilter);
+                if (selectedType != null) {
+                  facilities = facilities.where((f) => f.type == selectedType).toList();
+                }
+
+                // Apply search filter
+                if (_searchQuery.isNotEmpty) {
+                  facilities = facilities.where((facility) {
+                    final name = facility.name.toLowerCase();
+                    final address = facility.address?.toLowerCase() ?? '';
+                    return name.contains(_searchQuery) || address.contains(_searchQuery);
+                  }).toList();
+                }
+
+                // Sort by distance if user location is available
+                if (_userLocation != null) {
+                  facilities.sort((a, b) {
+                    final distA = a.distance ?? double.infinity;
+                    final distB = b.distance ?? double.infinity;
+                    return distA.compareTo(distB);
+                  });
+                }
+
+                if (facilities.isEmpty) {
+                  return const Center(
+                    child: Text('No facilities match your search criteria'),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: facilities.length,
+                  itemBuilder: (context, index) {
+                    return _buildFacilityCard(facilities[index]);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFacilityCard(HealthcareFacility facility) {
+  Widget _buildFacilityCard(Facility facility) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,7 +218,13 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
               Container(
                 height: 150,
                 width: double.infinity,
-                color: Colors.grey[300],
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
                 child: Center(
                   child: Icon(
                     _getFacilityIcon(facility.type),
@@ -204,6 +276,42 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                     ),
                   ),
                 ),
+
+              // Verified badge
+              if (facility.isVerified)
+                Positioned(
+                  top: 16,
+                  left: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(4),
+                        bottomRight: Radius.circular(4),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Verified',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
           Padding(
@@ -230,7 +338,7 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        facility.type,
+                        _getFacilityTypeLabel(facility.type),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -240,51 +348,69 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Expanded(child: Text(facility.address)),
-                    const SizedBox(width: 8),
-                    Text('${facility.distance} km away'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.star, size: 16, color: Colors.amber),
-                    const SizedBox(width: 4),
-                    Text('${facility.rating}'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Services:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Wrap(
-                  spacing: 8,
-                  children: facility.services.map((service) {
-                    return Chip(
-                      label: Text(
-                        service,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      padding: const EdgeInsets.all(0),
-                    );
-                  }).toList(),
-                ),
+                if (facility.address != null)
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Expanded(child: Text(facility.address!)),
+                      if (facility.distance != null) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          '${facility.distance!.toStringAsFixed(1)} km',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                if (facility.rating != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text('${facility.rating!.toStringAsFixed(1)}'),
+                    ],
+                  ),
+                ],
+                if (facility.services.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Services:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: facility.services.take(5).map((service) {
+                      return Chip(
+                        label: Text(
+                          service,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        padding: const EdgeInsets.all(0),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      );
+                    }).toList(),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        // TODO: Implement directions
-                      },
-                      icon: const Icon(Icons.directions),
-                      label: const Text('Directions'),
-                    ),
+                    if (facility.contactPhone != null)
+                      TextButton.icon(
+                        onPressed: () {
+                          // TODO: Implement call functionality
+                        },
+                        icon: const Icon(Icons.phone),
+                        label: const Text('Call'),
+                      ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
@@ -302,53 +428,42 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
     );
   }
 
-  IconData _getFacilityIcon(String type) {
+  IconData _getFacilityIcon(FacilityType type) {
     switch (type) {
-      case 'Hospital':
+      case FacilityType.hospital:
         return Icons.local_hospital;
-      case 'Clinic':
+      case FacilityType.clinic:
         return Icons.medical_services;
-      case 'Pharmacy':
+      case FacilityType.pharmacy:
         return Icons.medication;
-      default:
+      case FacilityType.healthCenter:
         return Icons.health_and_safety;
     }
   }
 
-  Color _getFacilityColor(String type) {
+  Color _getFacilityColor(FacilityType type) {
     switch (type) {
-      case 'Hospital':
+      case FacilityType.hospital:
         return Colors.red;
-      case 'Clinic':
+      case FacilityType.clinic:
         return Colors.blue;
-      case 'Pharmacy':
+      case FacilityType.pharmacy:
         return Colors.green;
-      default:
-        return Colors.grey;
+      case FacilityType.healthCenter:
+        return Colors.orange;
     }
   }
-}
 
-class HealthcareFacility {
-  final String id;
-  final String name;
-  final String type;
-  final String address;
-  final double distance;
-  final double rating;
-  final List<String> services;
-  final String imageUrl;
-  final bool acceptsNHIMA; // National Health Insurance Management Authority
-
-  HealthcareFacility({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.address,
-    required this.distance,
-    required this.rating,
-    required this.services,
-    required this.imageUrl,
-    this.acceptsNHIMA = false,
-  });
+  String _getFacilityTypeLabel(FacilityType type) {
+    switch (type) {
+      case FacilityType.hospital:
+        return 'Hospital';
+      case FacilityType.clinic:
+        return 'Clinic';
+      case FacilityType.pharmacy:
+        return 'Pharmacy';
+      case FacilityType.healthCenter:
+        return 'Health Center';
+    }
+  }
 }

@@ -14,6 +14,9 @@ import '../shared/emergency_components.dart';
 import '../profile/profile_screen.dart';
 import '../services/auth_service.dart';
 import '../landing/welcome_screen.dart';
+import '../services/facility_service.dart';
+import '../services/location_service.dart';
+import '../models/facility.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -31,6 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // Services
   final EmergencyService _emergencyService = EmergencyService();
   final AuthService _authService = AuthService();
+  final FacilityService _facilityService = FacilityService();
+  final LocationService _locationService = LocationService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
@@ -381,19 +386,89 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   Widget _buildNearbyFacilitiesList() {
-    // TODO: Fetch real nearby facilities from Firestore
-    return Column(
-      children: [
-        _buildFacilityCard('Lusaka Medical Center', '2.5 km', 'General Hospital'),
-        const SizedBox(height: 12),
-        _buildFacilityCard('University Teaching Hospital', '3.7 km', 'Specialized Care'),
-        const SizedBox(height: 12),
-        _buildFacilityCard('Kanyama Clinic', '1.2 km', 'Primary Care'),
-      ],
+    return FutureBuilder<GeoPoint?>(
+      future: _locationService.getCurrentLocation(),
+      builder: (context, locationSnapshot) {
+        return FutureBuilder<List<Facility>>(
+          future: _facilityService.getNearbyFacilities(
+            userLocation: locationSnapshot.data,
+            limit: 3,
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Unable to load facilities',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'No nearby facilities found',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: [
+                for (var facility in snapshot.data!.take(3))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildFacilityCard(facility),
+                  ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
   
-  Widget _buildFacilityCard(String name, String distance, String type) {
+  Widget _buildFacilityCard(Facility facility) {
+    String distanceText = '';
+    if (facility.distance != null) {
+      if (facility.distance! < 1) {
+        distanceText = '${(facility.distance! * 1000).toStringAsFixed(0)} m';
+      } else {
+        distanceText = '${facility.distance!.toStringAsFixed(1)} km';
+      }
+    }
+
+    String typeLabel = '';
+    switch (facility.type) {
+      case FacilityType.hospital:
+        typeLabel = 'Hospital';
+        break;
+      case FacilityType.clinic:
+        typeLabel = 'Clinic';
+        break;
+      case FacilityType.pharmacy:
+        typeLabel = 'Pharmacy';
+        break;
+      case FacilityType.healthCenter:
+        typeLabel = 'Health Center';
+        break;
+    }
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -407,27 +482,29 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Icon(Icons.local_hospital, color: Colors.blue[700], size: 24),
         ),
         title: Text(
-          name,
+          facility.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text(type),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  distance,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ],
-        ),
+        subtitle: Text(typeLabel),
+        trailing: distanceText.isNotEmpty
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        distanceText,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            : null,
         onTap: () => context.pushSlide(const FacilityDirectoryScreen()),
       ),
     );
@@ -833,12 +910,80 @@ class _HomeScreenState extends State<HomeScreen> {
                 context.pushSlide(const FacilityDirectoryScreen());
               },
             ),
-            // TODO: Replace with real FacilityService.getNearbyFacilities()
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Text('Loading facilities...'),
-              ),
+            FutureBuilder<GeoPoint?>(
+              future: _locationService.getCurrentLocation(),
+              builder: (context, locationSnapshot) {
+                return FutureBuilder<List<Facility>>(
+                  future: _facilityService.getNearbyFacilities(
+                    userLocation: locationSnapshot.data,
+                    limit: 5,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            children: [
+                              const Icon(Icons.local_hospital, size: 48, color: Colors.grey),
+                              const SizedBox(height: 16),
+                              Text(
+                                snapshot.hasError
+                                    ? 'Unable to load facilities'
+                                    : 'No facilities found',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () => context.pushSlide(const FacilityDirectoryScreen()),
+                                child: const Text('View All Facilities'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: snapshot.data!.map((facility) {
+                        String distanceText = '';
+                        if (facility.distance != null) {
+                          if (facility.distance! < 1) {
+                            distanceText = '${(facility.distance! * 1000).toStringAsFixed(0)} m';
+                          } else {
+                            distanceText = '${facility.distance!.toStringAsFixed(1)} km';
+                          }
+                        }
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: const Icon(Icons.local_hospital, color: Colors.blue),
+                            title: Text(facility.name),
+                            subtitle: Text(facility.address ?? ''),
+                            trailing: distanceText.isNotEmpty
+                                ? Text(
+                                    distanceText,
+                                    style: const TextStyle(color: Colors.grey),
+                                  )
+                                : null,
+                            onTap: () => context.pushSlide(const FacilityDirectoryScreen()),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
