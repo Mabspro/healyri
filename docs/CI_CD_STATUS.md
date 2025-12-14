@@ -17,6 +17,8 @@
 
 ### ⚠️ Partial (Builds but Won't Deploy)
 - **Build Web App** - Builds successfully, deployment skipped if Firebase secret not configured
+  - **Status:** Service account file found in project root
+  - **Action Required:** Add to GitHub Secrets (see `docs/FIREBASE_SECRET_SETUP.md`)
 
 ---
 
