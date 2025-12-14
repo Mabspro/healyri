@@ -54,6 +54,7 @@ class EmergencyService {
         status: EmergencyStatus.created,
         description: description,
         metadata: metadata,
+        receivedAt: timestamp, // Set canonical receivedAt timestamp
       );
 
       // Create emergency document in Firestore
