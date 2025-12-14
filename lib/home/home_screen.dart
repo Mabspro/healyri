@@ -5,7 +5,6 @@ import '../shared/theme.dart';
 import '../shared/components.dart';
 import '../shared/route_transitions.dart';
 import '../shared/responsive.dart';
-import '../booking/booking_screen.dart' hide Appointment, AppointmentStatus;
 import '../facility_directory/facility_directory_screen.dart';
 import '../emergency/emergency_screen.dart';
 import '../emergency/emergency_commitment_view.dart';
@@ -761,7 +760,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   
-  Widget _buildFindTab() {
+  Widget _buildFacilitiesTab() {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1138,7 +1137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final data = snapshot.data!.data() as Map<String, dynamic>?;
                     displayName = data?['name'] as String? ?? 
                                  user.displayName ?? 
-                                 const 'User';
+                                 'User';
                   } else if (user.displayName != null) {
                     displayName = user.displayName!;
                   }
