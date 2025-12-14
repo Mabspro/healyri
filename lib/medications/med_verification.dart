@@ -359,6 +359,7 @@ class _MedVerificationState extends State<MedVerification> {
 
     // Scroll to the result section
     Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
       Scrollable.ensureVisible(
         context,
         duration: const Duration(milliseconds: 300),
@@ -401,6 +402,7 @@ class _MedVerificationState extends State<MedVerification> {
 
     // Scroll to the result section
     Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
       Scrollable.ensureVisible(
         context,
         duration: const Duration(milliseconds: 300),
