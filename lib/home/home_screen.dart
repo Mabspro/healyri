@@ -5,7 +5,6 @@ import '../shared/theme.dart';
 import '../shared/components.dart';
 import '../shared/route_transitions.dart';
 import '../shared/responsive.dart';
-import '../shared/shimmer.dart';
 import '../booking/booking_screen.dart' hide Appointment, AppointmentStatus;
 import '../facility_directory/facility_directory_screen.dart';
 import '../emergency/emergency_screen.dart';
@@ -14,9 +13,7 @@ import '../models/emergency.dart';
 import '../services/emergency_service.dart';
 import '../shared/emergency_components.dart';
 import '../profile/profile_screen.dart';
-import '../services/appointment_service.dart';
 import '../services/auth_service.dart';
-import '../models/appointment.dart';
 import '../landing/welcome_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showFAB = false; // Show FAB only when scrolled down
   
   // Services
-  final AppointmentService _appointmentService = AppointmentService();
   final EmergencyService _emergencyService = EmergencyService();
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -630,7 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.shield_check,
+                    Icons.verified_user,
                     color: Colors.blue[700],
                     size: 24,
                   ),
