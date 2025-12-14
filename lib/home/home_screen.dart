@@ -9,12 +9,12 @@ import '../shared/shimmer.dart';
 import '../booking/booking_screen.dart' hide Appointment, AppointmentStatus;
 import '../facility_directory/facility_directory_screen.dart';
 import '../emergency/emergency_screen.dart';
-import '../telehealth/telehealth_screen.dart';
-import '../medications/med_verification.dart';
-import '../ai_triage/triage_chatbot.dart';
+import '../emergency/emergency_commitment_view.dart';
+import '../models/emergency.dart';
+import '../services/emergency_service.dart';
+import '../shared/emergency_components.dart';
 import '../profile/profile_screen.dart';
 import '../services/appointment_service.dart';
-import '../services/health_vitals_service.dart';
 import '../services/auth_service.dart';
 import '../models/appointment.dart';
 import '../landing/welcome_screen.dart';
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   
   // Services
   final AppointmentService _appointmentService = AppointmentService();
-  final HealthVitalsService _healthVitalsService = HealthVitalsService();
+  final EmergencyService _emergencyService = EmergencyService();
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -50,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: _buildCurrentScreen(),
       ),
+      floatingActionButton: _buildEmergencyFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -67,8 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Find',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_rounded),
-            label: 'Chat',
+            icon: Icon(Icons.explore_rounded),
+            label: 'Explore',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
@@ -80,6 +82,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   
+  Widget _buildEmergencyFAB() {
+    return FloatingActionButton.extended(
+      onPressed: () => context.pushSlide(const EmergencyScreen()),
+      backgroundColor: Colors.red[700],
+      foregroundColor: Colors.white,
+      icon: const Icon(Icons.emergency, size: 28),
+      label: const Text(
+        'Emergency',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      elevation: 6,
+    );
+  }
+  
   Widget _buildCurrentScreen() {
     switch (_currentIndex) {
       case 0:
@@ -87,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildFindTab();
       case 2:
-        return _buildChatTab();
+        return _buildExploreTab();
       case 3:
         return _buildProfileTab();
       default:
@@ -96,98 +115,359 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   Widget _buildHomeTab() {
-    final isMobile = Responsive.isMobile(context);
     final horizontalPadding = Responsive.horizontalPadding(context);
     
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(horizontalPadding),
+    return StreamBuilder<List<Emergency>>(
+      stream: _emergencyService.getUserEmergencies(),
+      builder: (context, snapshot) {
+        // Get active emergency (not resolved or cancelled)
+        final emergencies = snapshot.data ?? [];
+        final activeEmergency = emergencies.firstWhere(
+          (e) => e.status != EmergencyStatus.resolved && 
+                 e.status != EmergencyStatus.cancelled,
+          orElse: () => emergencies.isNotEmpty ? emergencies.first : Emergency(
+            id: '',
+            patientId: '',
+            timestamp: DateTime.now(),
+            location: const GeoPoint(0, 0),
+            urgency: EmergencyUrgency.medium,
+          ),
+        );
+        
+        final hasActiveEmergency = emergencies.isNotEmpty && 
+                                   activeEmergency.status != EmergencyStatus.resolved &&
+                                   activeEmergency.status != EmergencyStatus.cancelled;
+        
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // App bar with profile
+                _buildAppBar(),
+                const SizedBox(height: 24),
+                
+                // EMERGENCY DOMINANT SECTION (Top Priority)
+                if (hasActiveEmergency)
+                  _buildActiveEmergencyBanner(activeEmergency)
+                else
+                  _buildEmergencyHelpBanner(),
+                
+                const SizedBox(height: 24),
+                
+                // Nearby Facilities (Secondary - supports emergency wedge)
+                AppComponents.sectionHeader(
+                  title: 'Nearby Facilities',
+                  actionText: 'View All',
+                  onActionPressed: () => context.pushSlide(const FacilityDirectoryScreen()),
+                ),
+                _buildNearbyFacilitiesList(),
+                
+                const SizedBox(height: 24),
+                
+                // Upcoming Appointment (Keep - basic healthcare)
+                AppComponents.sectionHeader(
+                  title: 'Upcoming Appointment',
+                  actionText: 'View All',
+                  onActionPressed: () {
+                    // Navigate to appointments list
+                  },
+                ),
+                _buildUpcomingAppointment(),
+                
+                const SizedBox(height: 24),
+                
+                // My Coverage (Subscription status)
+                _buildCoverageCard(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildActiveEmergencyBanner(Emergency emergency) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmergencyCommitmentView(emergency: emergency),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.red[700]!, Colors.red[900]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // App bar with profile
-            _buildAppBar(),
-            const SizedBox(height: 24),
-            
-            // Health status card
-            _buildHealthStatusCard(),
-            const SizedBox(height: 24),
-            
-            // Quick actions
-            AppComponents.sectionHeader(
-              title: 'Quick Actions',
-              actionText: 'See All',
-              onActionPressed: () {
-                // Navigate to all features
-              },
-            ),
-            GridView.count(
-              crossAxisCount: Responsive.gridColumnCount(context),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: Responsive.spacing(context, mobile: 12, tablet: 16, desktop: 20),
-              crossAxisSpacing: Responsive.spacing(context, mobile: 12, tablet: 16, desktop: 20),
-              childAspectRatio: isMobile ? 1.4 : 1.5,
+            Row(
               children: [
-                AppComponents.quickActionCard(
-                  title: 'Book Appointment',
-                  icon: Icons.calendar_today_rounded,
-                  onTap: () => context.pushSlide(const BookingScreen()),
-                  gradientColors: AppTheme.primaryGradient,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.emergency,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
-                AppComponents.quickActionCard(
-                  title: 'Find Doctor',
-                  icon: Icons.search_rounded,
-                  onTap: () => context.pushSlide(const FacilityDirectoryScreen()),
-                  gradientColors: AppTheme.secondaryGradient,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Active Emergency',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      EmergencyStatusChip(
+                        status: emergency.status,
+                        urgency: emergency.urgency,
+                        compact: true,
+                      ),
+                    ],
+                  ),
                 ),
-                AppComponents.quickActionCard(
-                  title: 'Medication',
-                  icon: Icons.medication_rounded,
-                  onTap: () => context.pushSlide(const MedVerification()),
-                  gradientColors: AppTheme.accentGradient,
-                ),
-                AppComponents.quickActionCard(
-                  title: 'Emergency',
-                  icon: Icons.emergency_rounded,
-                  onTap: () => context.pushSlide(const EmergencyScreen()),
-                  isEmergency: true,
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 20,
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            
-            // Upcoming appointment
-            AppComponents.sectionHeader(
-              title: 'Upcoming Appointment',
-              actionText: 'View All',
-              onActionPressed: () {
-                // Navigate to appointments list
-              },
+            const SizedBox(height: 12),
+            Text(
+              'Tap to view status and updates',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 14,
+              ),
             ),
-            _buildUpcomingAppointment(),
-            
-            const SizedBox(height: 24),
-            
-            // Health tips
-            AppComponents.sectionHeader(
-              title: 'Health Tips',
-              actionText: 'More',
-              onActionPressed: () {
-                // Navigate to health tips
-              },
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildEmergencyHelpBanner() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.orange[400]!, Colors.red[600]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emergency,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Need Urgent Help?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Emergency response coordination',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => context.pushSlide(const EmergencyScreen()),
+            icon: const Icon(Icons.emergency, size: 20),
+            label: const Text(
+              'Request Emergency Help',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            _buildHealthTipCard(),
-            
-            const SizedBox(height: 24),
-            
-            // Telehealth services
-            AppComponents.sectionHeader(
-              title: 'Telehealth Services',
-              actionText: 'View All',
-              onActionPressed: () => context.pushSlide(const TelehealthScreen()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.red[700],
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            _buildTelehealthCard(),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildNearbyFacilitiesList() {
+    // TODO: Fetch real nearby facilities from Firestore
+    return Column(
+      children: [
+        _buildFacilityCard('Lusaka Medical Center', '2.5 km', 'General Hospital'),
+        const SizedBox(height: 12),
+        _buildFacilityCard('University Teaching Hospital', '3.7 km', 'Specialized Care'),
+        const SizedBox(height: 12),
+        _buildFacilityCard('Kanyama Clinic', '1.2 km', 'Primary Care'),
+      ],
+    );
+  }
+  
+  Widget _buildFacilityCard(String name, String distance, String type) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(Icons.local_hospital, color: Colors.blue[700], size: 24),
+        ),
+        title: Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(type),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  distance,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ],
+        ),
+        onTap: () => context.pushSlide(const FacilityDirectoryScreen()),
+      ),
+    );
+  }
+  
+  Widget _buildCoverageCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.shield, color: Colors.blue[700], size: 24),
+                const SizedBox(width: 12),
+                const Text(
+                  'My Coverage',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Active Coverage',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Emergency services available 24/7',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
           ],
         ),
       ),
@@ -272,106 +552,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   
-  Widget _buildHealthStatusCard() {
-    return StreamBuilder<HealthVitals>(
-      stream: _healthVitalsService.streamLatestVitals(),
-      builder: (context, snapshot) {
-        final vitals = snapshot.data ?? HealthVitals();
-        
-        // Format values with fallback to "--"
-        final heartRate = vitals.heartRate != null 
-            ? '${vitals.heartRate} bpm' 
-            : '--';
-        final steps = vitals.steps != null 
-            ? _formatNumber(vitals.steps!)
-            : '--';
-        final sleep = vitals.sleepHours != null 
-            ? '${vitals.sleepHours!.toStringAsFixed(1)} hrs' 
-            : '--';
-
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: AppTheme.primaryGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: AppTheme.primaryShadow,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Your Health Status',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildHealthMetric('Heart Rate', heartRate, Icons.favorite),
-                  _buildHealthMetric('Steps', steps, Icons.directions_walk),
-                  _buildHealthMetric('Sleep', sleep, Icons.nightlight_round),
-                ],
-              ),
-              const SizedBox(height: 16),
-              AppComponents.gradientButton(
-                text: 'View Health Report',
-                onPressed: () {
-                  // Navigate to health report
-                },
-                gradientColors: [Colors.white.withOpacity(0.2), Colors.white.withOpacity(0.3)],
-                icon: Icons.arrow_forward_rounded,
-                fullWidth: true,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  
-  Widget _buildHealthMetric(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
   
   Widget _buildUpcomingAppointment() {
     return StreamBuilder<Appointment?>(
@@ -443,152 +623,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   
-  Widget _buildHealthTipCard() {
-    return AppComponents.enhancedCard(
-      accentGradient: AppTheme.accentGradient,
-      onTap: () {
-        // Navigate to health tip details
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppTheme.accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.lightbulb_outline,
-                  color: AppTheme.accentColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Staying Hydrated',
-                  style: AppTheme.heading4,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Drinking enough water is crucial for maintaining good health, especially during hot weather. Aim for at least 8 glasses per day.',
-            style: AppTheme.bodyText,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  // Navigate to health tip details
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      'Read More',
-                      style: AppTheme.subtitle.copyWith(
-                        color: AppTheme.accentColor,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward,
-                      size: 16,
-                      color: AppTheme.accentColor,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildTelehealthCard() {
-    return AppComponents.enhancedCard(
-      accentGradient: AppTheme.secondaryGradient,
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const TelehealthScreen(),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppTheme.secondaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.videocam_rounded,
-              color: AppTheme.secondaryColor,
-              size: 40,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Talk to a Doctor Now',
-                  style: AppTheme.heading4,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Get medical advice from the comfort of your home',
-                  style: AppTheme.bodyText,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.circle,
-                            color: Colors.green,
-                            size: 8,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '5 Doctors Available',
-                            style: AppTheme.caption.copyWith(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
   
   Widget _buildFindTab() {
     return SingleChildScrollView(
@@ -777,48 +811,155 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
   
-  Widget _buildChatTab() {
-    return Center(
+  Widget _buildExploreTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.chat_rounded,
-              size: 60,
-              color: AppTheme.primaryColor,
+          Text(
+            'Explore',
+            style: AppTheme.heading2,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Additional healthcare services',
+            style: AppTheme.bodyText.copyWith(
+              color: AppTheme.textSecondaryColor,
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            'AI Health Assistant',
-            style: AppTheme.heading2,
+          
+          // Coming Soon Section
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.grey[600], size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Coming Soon',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'These features are being developed and will be available soon.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ),
+          
+          const SizedBox(height: 24),
+          
+          // Telehealth (Coming Soon)
+          _buildComingSoonCard(
+            'Telehealth Services',
+            'Talk to a doctor from home',
+            Icons.videocam_rounded,
+            Colors.blue,
+          ),
+          
           const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Get answers to your health questions and receive guidance on what to do next.',
-              style: AppTheme.bodyText,
-              textAlign: TextAlign.center,
-            ),
+          
+          // AI Triage (Coming Soon)
+          _buildComingSoonCard(
+            'AI Health Assistant',
+            'Get answers to health questions',
+            Icons.chat_rounded,
+            Colors.purple,
           ),
-          const SizedBox(height: 32),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: AppComponents.gradientButton(
-              text: 'Start Chat',
-              onPressed: () => context.pushSlide(const TriageChatbot()),
-              icon: Icons.chat_rounded,
-              fullWidth: true,
-            ),
+          
+          const SizedBox(height: 16),
+          
+          // Medication Verification (Coming Soon)
+          _buildComingSoonCard(
+            'Medication Verification',
+            'Verify medication authenticity',
+            Icons.medication_rounded,
+            Colors.orange,
           ),
         ],
+      ),
+    );
+  }
+  
+  Widget _buildComingSoonCard(String title, String description, IconData icon, Color color) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Opacity(
+        opacity: 0.6,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Soon',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
