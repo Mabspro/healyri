@@ -188,13 +188,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                       minHeight: constraints.maxHeight,
                     ),
                     child: Padding(
-                        padding: EdgeInsets.only(
-                          top: isMobile ? 16.0 : 32.0,
-                          left: horizontalPadding,
-                          right: horizontalPadding,
-                        ),
-                        child: Column(
-                          children: [
+                      padding: EdgeInsets.only(
+                        top: isMobile ? 16.0 : 32.0,
+                        left: horizontalPadding,
+                        right: horizontalPadding,
+                      ),
+                      child: Column(
+                        children: [
                             // Top section with logo and tagline
                             Padding(
                               padding: EdgeInsets.symmetric(
@@ -319,8 +319,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
