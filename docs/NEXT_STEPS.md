@@ -172,10 +172,11 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 
 **Tasks:**
 - [x] Create `scripts/seed_facilities.js`
-- [ ] Add service account key setup instructions
-- [ ] Run seed script to populate Firestore
+- [x] Add service account key setup instructions (in `docs/SEED_DATA_GUIDE.md`)
+- [x] Update seed script to use correct service account file path
+- [ ] Run seed script to populate Firestore (ready to run)
 - [ ] Verify seeded data in Firebase Console
-- [ ] Document seed data process
+- [x] Document seed data process (`docs/SEED_DATA_GUIDE.md`)
 
 **Acceptance Criteria:**
 - At least 5 facilities seeded in Firestore
@@ -187,10 +188,10 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 **Priority: MEDIUM**
 
 **Tasks:**
-- [ ] Add verified responder badge
-- [ ] Add facility readiness indicator
-- [ ] Add "dispatch center" identity
-- [ ] Ensure offline fallback always visible (Call/SMS)
+- [x] Add verified responder badge (exists in ResponderCard)
+- [x] Add facility readiness indicator (exists in FacilityCard with Zambia accent)
+- [x] Add "dispatch center" identity (added to EmergencyCommitmentView)
+- [x] Ensure offline fallback always visible (Call/SMS) (exists in FallbackActionBar)
 
 **Acceptance Criteria:**
 - Trust signals visible throughout emergency flow

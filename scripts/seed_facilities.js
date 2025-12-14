@@ -7,7 +7,20 @@
  */
 
 const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json'); // Add your service account key
+const path = require('path');
+
+// Use the service account file from project root
+const serviceAccountPath = path.join(__dirname, '..', 'healyri-af36a-firebase-adminsdk-fbsvc-ea3b7a38c5.json');
+
+// Check if file exists
+const fs = require('fs');
+if (!fs.existsSync(serviceAccountPath)) {
+  console.error('❌ Service account file not found at:', serviceAccountPath);
+  console.error('   Please ensure the service account JSON file is in the project root.');
+  process.exit(1);
+}
+
+const serviceAccount = require(serviceAccountPath);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

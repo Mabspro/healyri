@@ -570,20 +570,28 @@ class FacilityCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // Readiness indicator
+                // Facility readiness indicator (with Zambia accent)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isReady ? Colors.green[100] : Colors.orange[100],
-                    borderRadius: BorderRadius.circular(12),
+                    color: isReady 
+                        ? AppTheme.zambiaGreen.withOpacity(0.15)
+                        : Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isReady
+                          ? AppTheme.zambiaGreen.withOpacity(0.3)
+                          : Colors.orange.withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isReady ? Icons.check_circle : Icons.pending,
-                        size: 14,
-                        color: isReady ? Colors.green[700] : Colors.orange[700],
+                        isReady ? Icons.check_circle : Icons.warning,
+                        size: 12,
+                        color: isReady ? AppTheme.zambiaGreen : Colors.orange[700],
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -591,7 +599,7 @@ class FacilityCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: isReady ? Colors.green[700] : Colors.orange[700],
+                          color: isReady ? AppTheme.zambiaGreen : Colors.orange[700],
                         ),
                       ),
                     ],
