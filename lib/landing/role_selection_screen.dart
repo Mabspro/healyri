@@ -34,7 +34,7 @@ class RoleSelectionScreen extends StatelessWidget {
             child: Column(
               children: [
                 // Top section with back button and logo - Very compact on mobile
-                Container(
+                SizedBox(
                   height: isMobile ? 90 : 160,
                   child: Stack(
                     children: [

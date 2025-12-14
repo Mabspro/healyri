@@ -1138,7 +1138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final data = snapshot.data!.data() as Map<String, dynamic>?;
                     displayName = data?['name'] as String? ?? 
                                  user.displayName ?? 
-                                 'User';
+                                 const 'User';
                   } else if (user.displayName != null) {
                     displayName = user.displayName!;
                   }

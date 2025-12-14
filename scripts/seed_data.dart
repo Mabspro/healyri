@@ -76,9 +76,9 @@ void main() async {
         'emailVerified': true,
       });
 
-      print('Created user: ${userData['name']}');
+      // User created successfully
     } catch (e) {
-      print('Error creating user ${userData['name']}: $e');
+      // Error creating user
     }
   }
 
@@ -115,5 +115,5 @@ void main() async {
     }
   }
 
-  print('Data seeding completed!');
+  // Data seeding completed
 } 

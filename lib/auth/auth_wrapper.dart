@@ -211,6 +211,7 @@ class AuthWrapper extends StatelessWidget {
                     await authService.currentUser?.reload();
                     
                     // Show loading indicator
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Checking verification status...'),
@@ -218,6 +219,7 @@ class AuthWrapper extends StatelessWidget {
                       ),
                     );
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Error: ${e.toString()}'),

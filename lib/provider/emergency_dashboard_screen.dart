@@ -381,7 +381,7 @@ class _EmergencyDashboardScreenState extends State<EmergencyDashboardScreen> {
     } else if (estimatedMinutes <= 15) {
       return 'Arriving in approximately $estimatedMinutes minutes';
     } else {
-      return 'Estimated arrival: ${estimatedMinutes} minutes';
+      return 'Estimated arrival: $estimatedMinutes minutes';
     }
   }
 }

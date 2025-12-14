@@ -303,6 +303,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             
                             // Close dialog after a delay
                             Future.delayed(const Duration(seconds: 2), () {
+                              if (!mounted) return;
                               if (Navigator.of(context).canPop()) {
                                 Navigator.of(context).pop();
                               }

@@ -67,9 +67,9 @@ void main() async {
       // Store user data in Firestore
       await firestore.collection('users').doc(uid).set(userData);
       
-      print('Created user: ${userData['name']}');
+      // User created successfully
     } catch (e) {
-      print('Error creating user ${userData['name']}: $e');
+      // Error creating user
     }
   }
 
@@ -106,5 +106,5 @@ void main() async {
     }
   }
 
-  print('Data seeding completed!');
+  // Data seeding completed
 } 

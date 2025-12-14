@@ -67,6 +67,9 @@ keystore.properties
 *.g.dart
 *.freezed.dart
 
+# Firebase Data Connect generated files
+dataconnect-generated/
+
 # Flutter version manager
 .fvm/
 

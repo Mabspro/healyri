@@ -284,18 +284,12 @@ class EmergencyService {
   /// Calculate emergency response metrics (Week 4)
   Map<String, Duration?> calculateMetrics(Emergency emergency) {
     return {
-      'timeToDispatch': emergency.dispatchedAt != null
-          ? emergency.dispatchedAt!.difference(emergency.timestamp)
-          : null,
+      'timeToDispatch': emergency.dispatchedAt?.difference(emergency.timestamp),
       'timeToArrival': emergency.arrivedAt != null && emergency.inTransitAt != null
           ? emergency.arrivedAt!.difference(emergency.inTransitAt!)
           : null,
-      'timeToResolution': emergency.resolvedAt != null
-          ? emergency.resolvedAt!.difference(emergency.timestamp)
-          : null,
-      'totalResponseTime': emergency.arrivedAt != null
-          ? emergency.arrivedAt!.difference(emergency.timestamp)
-          : null,
+      'timeToResolution': emergency.resolvedAt?.difference(emergency.timestamp),
+      'totalResponseTime': emergency.arrivedAt?.difference(emergency.timestamp),
     };
   }
 
