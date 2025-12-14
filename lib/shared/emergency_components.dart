@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/emergency.dart';
+import '../models/emergency_timeline_stage.dart';
 
 /// Emergency Status Chip - Color-coded status indicator
 class EmergencyStatusChip extends StatelessWidget {
