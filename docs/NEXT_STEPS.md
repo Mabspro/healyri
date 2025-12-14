@@ -65,7 +65,7 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - [x] Delete `HealthcareFacility` class from `facility_directory_screen.dart`
 - [x] Convert `FacilityDirectoryScreen` to use `Facility` model + `FacilityService`
 - [x] Replace hardcoded facilities in `home_screen.dart` with `FacilityService.getNearbyFacilities()`
-- [ ] Update `triage_chatbot.dart` to use FacilityService
+- [x] Update `triage_chatbot.dart` to use FacilityService
 - [x] Test with real Firestore data
 
 **Acceptance Criteria:**
@@ -112,14 +112,14 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 **Priority: MEDIUM** - Local identity without overdoing
 
 **Tasks:**
-- [ ] Add Zambia accent colors to theme (subtle, not dominant)
-- [ ] Apply accents to:
+- [x] Add Zambia accent colors to theme (subtle, not dominant)
+- [x] Apply accents to:
   - Verified badges
   - NHIMA acceptance chips
   - Emergency status chips
   - Small accent strokes/dividers
-- [ ] Keep base palette clean and modern
-- [ ] Test that it "whispers Zambia" not "shouts"
+- [x] Keep base palette clean and modern
+- [x] Test that it "whispers Zambia" not "shouts"
 
 **Acceptance Criteria:**
 - Zambia identity visible but subtle
@@ -243,7 +243,7 @@ HeaLyri has successfully completed the emergency coordination shift. The platfor
 - [x] Single Facility model used everywhere
 - [x] Welcome screen animations smooth
 - [x] Emergency Readiness shows real state
-- [ ] Zambia accents added subtly
+- [x] Zambia accents added subtly
 
 **Next Phase Ready When:**
 - [x] Navigation clearly emergency-first
