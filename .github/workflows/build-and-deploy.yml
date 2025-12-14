@@ -1,5 +1,8 @@
 name: Build and Deploy
 
+# Emergency-critical: This workflow ensures code quality and deployment safety
+# See docs/GITHUB-Enhancement.md for hardening roadmap
+
 on:
   push:
     branches: [main, develop]
