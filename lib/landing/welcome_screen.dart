@@ -268,7 +268,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                             ),
 
                             // Spacing before button
-                            Expanded(child: SizedBox(height: 24)),
+                            const SizedBox(height: 24),
                             
                             // Get Started button with pulsing animation
                             FadeTransition(
