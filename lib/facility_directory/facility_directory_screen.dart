@@ -5,6 +5,7 @@ import '../services/facility_service.dart';
 import '../services/location_service.dart';
 import '../shared/theme.dart';
 import '../shared/route_transitions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FacilityDirectoryScreen extends StatefulWidget {
   const FacilityDirectoryScreen({Key? key}) : super(key: key);
@@ -234,7 +235,7 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                 ),
               ),
               
-              // NHIMA banner
+              // NHIMA banner (with Zambia accent)
               if (facility.acceptsNHIMA)
                 Positioned(
                   top: 16,
@@ -242,14 +243,14 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade700,
+                      color: AppTheme.zambiaGreen,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(4),
                         bottomLeft: Radius.circular(4),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: AppTheme.zambiaGreen.withOpacity(0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -277,7 +278,7 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                   ),
                 ),
 
-              // Verified badge
+              // Verified badge (with Zambia accent)
               if (facility.isVerified)
                 Positioned(
                   top: 16,
@@ -285,11 +286,18 @@ class _FacilityDirectoryScreenState extends State<FacilityDirectoryScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
+                      color: AppTheme.zambiaAccent,
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(4),
                         bottomRight: Radius.circular(4),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.zambiaAccent.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,

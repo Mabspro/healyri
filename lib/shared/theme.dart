@@ -14,6 +14,12 @@ class AppTheme {
   static const Color warningColor = Color(0xFFFFB300);
   static const Color infoColor = Color(0xFF039BE5);
   
+  // Zambia accent colors (subtle, for badges and accents only)
+  static const Color zambiaGreen = Color(0xFF198A00);  // Zambia flag green
+  static const Color zambiaRed = Color(0xFFEF3340);   // Zambia flag red
+  static const Color zambiaOrange = Color(0xFFFF8C00); // Zambia flag orange
+  static const Color zambiaAccent = Color(0xFF198A00); // Primary accent (green)
+  
   static const Color cardColor = Colors.white;
   static const Color dividerColor = Color(0xFFEEEEEE);
   

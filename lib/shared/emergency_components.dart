@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/emergency.dart';
 import '../models/emergency_timeline_stage.dart';
+import '../shared/theme.dart';
 
 /// Emergency Status Chip - Color-coded status indicator
 class EmergencyStatusChip extends StatelessWidget {
@@ -41,15 +42,15 @@ class EmergencyStatusChip extends StatelessWidget {
   (String, Color, IconData) _getStatusInfo(EmergencyStatus status, EmergencyUrgency? urgency) {
     switch (status) {
       case EmergencyStatus.created:
-        return ('Received', Colors.green, Icons.check_circle_outline);
+        return ('Received', AppTheme.zambiaGreen, Icons.check_circle_outline);
       case EmergencyStatus.dispatched:
-        return ('Assigned', Colors.blue, Icons.assignment);
+        return ('Assigned', AppTheme.primaryColor, Icons.assignment);
       case EmergencyStatus.inTransit:
-        return ('En Route', Colors.purple, Icons.directions_car);
+        return ('En Route', AppTheme.zambiaOrange, Icons.directions_car);
       case EmergencyStatus.arrived:
-        return ('Arrived', Colors.orange, Icons.location_on);
+        return ('Arrived', AppTheme.warningColor, Icons.location_on);
       case EmergencyStatus.resolved:
-        return ('Resolved', Colors.green, Icons.check_circle);
+        return ('Resolved', AppTheme.zambiaGreen, Icons.check_circle);
       case EmergencyStatus.cancelled:
         return ('Cancelled', Colors.grey, Icons.cancel);
     }
@@ -353,20 +354,24 @@ class ResponderCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green[100],
+                      color: AppTheme.zambiaGreen.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.zambiaGreen.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.verified, size: 14, color: Colors.green[700]),
+                        Icon(Icons.verified, size: 14, color: AppTheme.zambiaGreen),
                         const SizedBox(width: 4),
                         Text(
                           'Verified',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.green[700],
+                            color: AppTheme.zambiaGreen,
                           ),
                         ),
                       ],

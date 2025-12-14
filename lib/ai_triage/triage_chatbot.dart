@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/facility_service.dart';
+import '../services/location_service.dart';
+import '../models/facility.dart';
 
 class TriageChatbot extends StatefulWidget {
   const TriageChatbot({Key? key}) : super(key: key);
@@ -11,6 +14,8 @@ class _TriageChatbotState extends State<TriageChatbot> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<dynamic> _messages = []; // Changed to dynamic to accept different message types
+  final FacilityService _facilityService = FacilityService();
+  final LocationService _locationService = LocationService();
   bool _isTyping = false;
 
   @override
@@ -115,12 +120,46 @@ class _TriageChatbotState extends State<TriageChatbot> {
               // TODO: Implement emergency call
               _addBotMessage('Connecting you to emergency services...');
             },
-            onFindHospitalTap: () {
-              // TODO: Implement find hospital
+            onFindHospitalTap: () async {
+              // Get nearby facilities from Firestore
+              final location = await _locationService.getCurrentLocation();
+              final facilities = await _facilityService.getNearbyFacilities(
+                userLocation: location,
+                limit: 3,
+              );
+              
+              if (facilities.isEmpty) {
+                _addBotMessage(
+                  'No emergency facilities found nearby. Please contact emergency services directly or try again later.',
+                );
+                return;
+              }
+              
               _addBotMessage(
-                  'Here are the nearest emergency facilities to your location:');
-              _addBotMessage(
-                  '1. Lusaka General Hospital - 2.5 km away\n2. University Teaching Hospital - 3.7 km away\n3. Kanyama Clinic - 1.2 km away');
+                'Here are the nearest emergency facilities to your location:',
+              );
+              
+              String facilitiesList = '';
+              for (int i = 0; i < facilities.length; i++) {
+                final facility = facilities[i];
+                String distanceText = '';
+                if (facility.distance != null) {
+                  if (facility.distance! < 1) {
+                    distanceText = '${(facility.distance! * 1000).toStringAsFixed(0)} m';
+                  } else {
+                    distanceText = '${facility.distance!.toStringAsFixed(1)} km';
+                  }
+                }
+                facilitiesList += '${i + 1}. ${facility.name}';
+                if (distanceText.isNotEmpty) {
+                  facilitiesList += ' - $distanceText away';
+                }
+                if (i < facilities.length - 1) {
+                  facilitiesList += '\n';
+                }
+              }
+              
+              _addBotMessage(facilitiesList);
             },
           ),
         );
