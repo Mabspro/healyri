@@ -82,7 +82,7 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     needs: [analyze, test]
-    if: false  # Disabled until Java 17 is configured
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       
@@ -90,7 +90,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
       
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -116,7 +116,7 @@ jobs:
     name: Build iOS App
     runs-on: macos-latest
     needs: [analyze, test]
-    if: false  # Disabled until iOS deployment target is updated to 15.0
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       

@@ -11,10 +11,12 @@
 - **Analyze Code** - All compilation errors fixed, only info-level warnings (non-fatal)
 - **Run Tests** - Widget test passing with `runAsync` to handle timers
 
-### ⏸️ Tabled (Disabled Until Setup)
-- **Build Web App** - Requires Firebase service account secret
-- **Build Android APK** - Requires Java 17 (currently using Java 11)
-- **Build iOS App** - Requires iOS deployment target 15.0 (currently 12.0)
+### ✅ Enabled (Ready to Build)
+- **Build Android APK** - ✅ Java 17 configured
+- **Build iOS App** - ✅ iOS deployment target 15.0 configured
+
+### ⚠️ Partial (Builds but Won't Deploy)
+- **Build Web App** - Builds successfully, deployment skipped if Firebase secret not configured
 
 ---
 
@@ -37,33 +39,24 @@
 
 ---
 
-## To Enable Later
+## To Enable Full Deployment
 
-### Build Web App
-**Requires:**
-- Firebase service account secret in GitHub Secrets (`FIREBASE_SERVICE_ACCOUNT`)
+### Build Web App (Deployment)
+**Current Status:** Builds successfully, deployment skipped if secret missing
 
-**Steps:**
+**To Enable Deployment:**
 1. Generate Firebase service account key from Firebase Console
-2. Add to GitHub Secrets as `FIREBASE_SERVICE_ACCOUNT`
-3. Change `if: false` to `if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'` in workflow
+   - Go to Firebase Console → Project Settings → Service Accounts
+   - Click "Generate New Private Key"
+   - Download the JSON file
+2. Add to GitHub Secrets:
+   - Go to GitHub repo → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FIREBASE_SERVICE_ACCOUNT`
+   - Value: Paste the entire contents of the JSON file
+3. Deployment will automatically work on next push to main
 
-### Build Android APK
-**Requires:**
-- Java 17 instead of Java 11
-
-**Steps:**
-1. Update workflow: Change `java-version: '11'` to `java-version: '17'`
-2. Change `if: false` to `if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'` in workflow
-
-### Build iOS App
-**Requires:**
-- iOS deployment target updated to 15.0
-
-**Steps:**
-1. Update `ios/Runner.xcodeproj/project.pbxproj`: Change `IPHONEOS_DEPLOYMENT_TARGET = 12.0` to `15.0` (3 occurrences)
-2. Update `ios/Flutter/AppFrameworkInfo.plist`: Change `MinimumOSVersion` to `15.0`
-3. Change `if: false` to `if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'` in workflow
+**Note:** The build step will always run. If the secret is missing, it will skip deployment but the build will still succeed.
 
 ---
 
