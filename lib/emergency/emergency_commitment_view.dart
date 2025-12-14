@@ -23,11 +23,9 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
   
   // Responder data
   Map<String, dynamic>? _responderData;
-  bool _loadingResponder = false;
   
   // Facility data
   Map<String, dynamic>? _facilityData;
-  bool _loadingFacility = false;
 
   @override
   void initState() {
@@ -39,7 +37,6 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
   Future<void> _loadResponderData() async {
     if (widget.emergency.assignedDriverId == null) return;
     
-    setState(() => _loadingResponder = true);
     try {
       final driverDoc = await _firestore
           .collection('drivers')
@@ -61,18 +58,16 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
             'vehicleType': driverData?['vehicleType'] ?? 'Vehicle',
             'isVerified': driverData?['isVerified'] ?? false,
           };
-          _loadingResponder = false;
         });
       }
     } catch (e) {
-      setState(() => _loadingResponder = false);
+      // Handle error silently
     }
   }
 
   Future<void> _loadFacilityData() async {
     if (widget.emergency.assignedFacilityId == null) return;
     
-    setState(() => _loadingFacility = true);
     try {
       final facilityDoc = await _firestore
           .collection('facilities')
@@ -87,11 +82,10 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
             'name': facilityData?['name'] ?? 'Healthcare Facility',
             'isReady': facilityData?['emergencyAcceptanceStatus'] == 'available',
           };
-          _loadingFacility = false;
         });
       }
     } catch (e) {
-      setState(() => _loadingFacility = false);
+      // Handle error silently
     }
   }
 
@@ -312,7 +306,7 @@ class _EmergencyCommitmentViewState extends State<EmergencyCommitmentView> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Keep phone charged; we'll update you in real time.',
+                  'Keep phone charged; we\'ll update you in real time.',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.orange[800],
