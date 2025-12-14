@@ -4,8 +4,6 @@ import '../models/facility.dart';
 import '../services/facility_service.dart';
 import '../services/location_service.dart';
 import '../shared/theme.dart';
-import '../shared/route_transitions.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FacilityDirectoryScreen extends StatefulWidget {
   const FacilityDirectoryScreen({Key? key}) : super(key: key);
