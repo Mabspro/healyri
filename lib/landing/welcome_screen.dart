@@ -66,8 +66,9 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateMixin {
+  late AnimationController _entranceController;
+  late AnimationController _pulseController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
@@ -99,8 +100,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     
-    // Set up animations
-    _animationController = AnimationController(
+    // Set up entrance animations
+    _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
@@ -109,7 +110,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: _entranceController,
       curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
     ));
     
@@ -117,44 +118,40 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       begin: 0.95,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: _entranceController,
       curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
     ));
     
-    _pulseAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.05),
-        weight: 1.0,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 1.0),
-        weight: 1.0,
-      ),
-    ]).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.8, 1.0, curve: Curves.easeInOut),
+    // Set up separate pulse animation controller
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    
+    _pulseAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
     ));
     
-    // Start animation
-    _animationController.forward();
+    // Start entrance animation
+    _entranceController.forward();
     
-    // Set up pulsing animation for the button (slower)
+    // Start pulsing animation after entrance completes
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (mounted) {
-        try {
-          // Slow down the animation by setting a longer duration
-          _animationController.duration = const Duration(milliseconds: 3000);
-          _animationController.repeat(reverse: true);
-        } catch (e) {
-          // Ignore errors if controller is disposed
-        }
+        _pulseController.repeat(reverse: true);
       }
     });
   }
   
   @override
   void dispose() {
-    _animationController.dispose();
+    _entranceController.dispose();
+    _pulseController.dispose();
+    _cardPageController.dispose();
     super.dispose();
   }
 
@@ -190,8 +187,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight,
                     ),
-                    child: IntrinsicHeight(
-                      child: Padding(
+                    child: Padding(
                         padding: EdgeInsets.only(
                           top: isMobile ? 16.0 : 32.0,
                           left: horizontalPadding,
@@ -271,8 +267,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                               ),
                             ),
 
-                            // Spacer to push button to bottom if space exists
-                            const Spacer(),
+                            // Spacing before button
+                            Expanded(child: SizedBox(height: 24)),
                             
                             // Get Started button with pulsing animation
                             FadeTransition(

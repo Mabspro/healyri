@@ -17,6 +17,8 @@ import '../landing/welcome_screen.dart';
 import '../services/facility_service.dart';
 import '../services/location_service.dart';
 import '../models/facility.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -685,6 +687,8 @@ class _HomeScreenState extends State<HomeScreen> {
   
   
   Widget _buildEmergencyReadiness() {
+    final user = _auth.currentUser;
+    
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -721,21 +725,51 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
             
-            // Readiness checklist
-            _buildReadinessItem(
-              Icons.check_circle,
-              'Coverage active',
-              Colors.green,
-              true,
+            // Readiness checklist with real checks
+            StreamBuilder<DocumentSnapshot>(
+              stream: user != null 
+                  ? _firestore.collection('users').doc(user.uid).snapshots()
+                  : null,
+              builder: (context, userSnapshot) {
+                // Check coverage (assume active if user exists and is verified)
+                final hasCoverage = user != null && 
+                    (userSnapshot.hasData && 
+                     (userSnapshot.data?.data() as Map<String, dynamic>?)?['isVerified'] == true);
+                
+                return Column(
+                  children: [
+                    _buildReadinessItem(
+                      Icons.check_circle,
+                      'Coverage active',
+                      hasCoverage ? Colors.green : Colors.orange,
+                      hasCoverage,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            _buildReadinessItem(
-              Icons.location_on,
-              'Location enabled',
-              Colors.green,
-              true,
+            
+            // Location permission check
+            FutureBuilder<PermissionStatus>(
+              future: Permission.location.status,
+              builder: (context, locationSnapshot) {
+                final locationEnabled = locationSnapshot.data == PermissionStatus.granted;
+                return Column(
+                  children: [
+                    _buildReadinessItem(
+                      Icons.location_on,
+                      'Location enabled',
+                      locationEnabled ? Colors.green : Colors.orange,
+                      locationEnabled,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 12),
+            
+            // Hotline always available
             _buildReadinessItem(
               Icons.phone,
               'Hotline available',
@@ -743,16 +777,32 @@ class _HomeScreenState extends State<HomeScreen> {
               true,
             ),
             const SizedBox(height: 12),
-            _buildReadinessItem(
-              Icons.contacts,
-              'Emergency contacts set',
-              Colors.orange,
-              false, // TODO: Check if emergency contacts are set
+            
+            // Emergency contacts check
+            StreamBuilder<DocumentSnapshot>(
+              stream: user != null 
+                  ? _firestore.collection('users').doc(user.uid).snapshots()
+                  : null,
+              builder: (context, userSnapshot) {
+                final data = userSnapshot.data?.data() as Map<String, dynamic>?;
+                final hasEmergencyContacts = data?['emergencyContacts'] != null &&
+                    (data!['emergencyContacts'] as List).isNotEmpty;
+                
+                return Column(
+                  children: [
+                    _buildReadinessItem(
+                      Icons.contacts,
+                      'Emergency contacts set',
+                      hasEmergencyContacts ? Colors.green : Colors.orange,
+                      hasEmergencyContacts,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              },
             ),
             
-            const SizedBox(height: 20),
-            
-            // Battery optimization tip (optional)
+            // Battery optimization tip (always show as reminder)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
