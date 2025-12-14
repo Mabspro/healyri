@@ -187,15 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 
                 const SizedBox(height: 24),
                 
-                // Upcoming Appointment (Keep - basic healthcare)
+                // Emergency Readiness (Replaces appointments - emergency-first focus)
                 AppComponents.sectionHeader(
-                  title: 'Upcoming Appointment',
-                  actionText: 'View All',
+                  title: 'Emergency Readiness',
+                  actionText: 'Review Setup',
                   onActionPressed: () {
-                    // Navigate to appointments list
+                    // TODO: Navigate to emergency setup/review screen
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Emergency setup review coming soon')),
+                    );
                   },
                 ),
-                _buildUpcomingAppointment(),
+                _buildEmergencyReadiness(),
                 
                 const SizedBox(height: 24),
                 
@@ -609,73 +612,155 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   
-  Widget _buildUpcomingAppointment() {
-    return StreamBuilder<Appointment?>(
-      stream: _appointmentService.streamUpcomingAppointment(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return ShimmerCard(
-            height: 120,
-            borderRadius: 16,
-          );
-        }
-
-        final appointment = snapshot.data;
-
-        if (appointment == null) {
-          return Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: Column(
+  Widget _buildEmergencyReadiness() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'No upcoming appointments',
-                  style: AppTheme.bodyText.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.shield_check,
+                    color: Colors.blue[700],
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BookingScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Book an Appointment'),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Emergency Readiness',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
-          );
-        }
-
-        return AppComponents.appointmentCard(
-          doctorName: appointment.providerName ?? 'TBD',
-          specialty: appointment.serviceType ?? 'General Consultation',
-          facilityName: appointment.facilityName,
-          dateTime: appointment.dateTime,
-          status: appointment.status == AppointmentStatus.confirmed 
-              ? 'Confirmed' 
-              : appointment.status == AppointmentStatus.pending
-                  ? 'Pending'
-                  : 'Scheduled',
-          onTap: () {
-            // Navigate to appointment details
-          },
-        );
-      },
+            const SizedBox(height: 20),
+            
+            // Readiness checklist
+            _buildReadinessItem(
+              Icons.check_circle,
+              'Coverage active',
+              Colors.green,
+              true,
+            ),
+            const SizedBox(height: 12),
+            _buildReadinessItem(
+              Icons.location_on,
+              'Location enabled',
+              Colors.green,
+              true,
+            ),
+            const SizedBox(height: 12),
+            _buildReadinessItem(
+              Icons.phone,
+              'Hotline available',
+              Colors.green,
+              true,
+            ),
+            const SizedBox(height: 12),
+            _buildReadinessItem(
+              Icons.contacts,
+              'Emergency contacts set',
+              Colors.orange,
+              false, // TODO: Check if emergency contacts are set
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Battery optimization tip (optional)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.battery_charging_full, color: Colors.amber[700], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Keep phone charged for faster emergency response',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.amber[900],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // CTA Button
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Navigate to emergency setup/review screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Emergency setup review coming soon')),
+                );
+              },
+              icon: const Icon(Icons.settings, size: 18),
+              label: const Text('Review Emergency Setup'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[700],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildReadinessItem(IconData icon, String label, Color color, bool isComplete) {
+    return Row(
+      children: [
+        Icon(
+          isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
+          color: isComplete ? color : Colors.grey[400],
+          size: 20,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isComplete ? Colors.grey[900] : Colors.grey[600],
+            ),
+          ),
+        ),
+        if (!isComplete)
+          Text(
+            'Set up',
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+      ],
     );
   }
   
